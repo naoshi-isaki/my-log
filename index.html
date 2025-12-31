@@ -189,4 +189,19 @@
             
             activeMonthList.appendChild(link);
 
-            const sec = document.
+            const sec = document.createElement("div");
+            sec.id = sid; sec.className = "month-title"; sec.innerText = ym;
+            output.appendChild(sec);
+          }
+
+          const card = document.createElement("div");
+          card.className = "note-card"; card.style.borderLeftColor = clr;
+          card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
+          output.appendChild(card);
+        });
+      } catch (e) { console.error(e); }
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>
