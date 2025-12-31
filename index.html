@@ -119,3 +119,78 @@
       const status = document.getElementById("status");
       const errorBox = document.getElementById("error-box");
       const indexList = document.getElementById("index-list");
+      const output = document.getElementById("output");
+
+      try {
+        const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
+        const response = await fetch("database.db");
+        if (!response.ok) throw new Error("database.dbが見つかりません。");
+        
+        const buf = await response.arrayBuffer();
+        const db = new SQL.Database(new Uint8Array(buf));
+        
+        const res = db.exec("SELECT day, content, marker_color FROM note ORDER BY day DESC");
+        if (!res.length || !res[0].values.length) throw new Error("データがありません。");
+
+        const rows = res[0].values;
+        let currentYear = "";
+        let currentYM = "";
+        let yearGroupDiv = null;
+
+        rows.forEach(row => {
+          let rawD = (row[0] || "").trim();
+          let txt = row[1] || "";
+          let clr = row[2] || "#cccccc";
+          
+          let norm = rawD.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/\s+/g, " ");
+          const match = norm.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})/);
+          
+          let y = match ? match[1] : "Other";
+          let m = match ? match[2].padStart(2, '0') : "";
+          let ym = match ? `${y}. ${m}` : "Other";
+
+          if (y !== currentYear) {
+            currentYear = y;
+            yearGroupDiv = document.createElement("div");
+            yearGroupDiv.className = "year-group";
+            yearGroupDiv.innerHTML = `<span class="year-label">${y}</span>`;
+            indexList.appendChild(yearGroupDiv);
+          }
+
+          if (ym !== currentYM) {
+            currentYM = ym;
+            const sid = "idx-" + ym.replace(/[^0-9]/g, "");
+            
+            const link = document.createElement("a");
+            link.href = "#" + sid;
+            link.className = "index-link";
+            link.innerText = match ? `${m}月` : "Other";
+            
+            // スマホ時、リンククリックでメニューを閉じる
+            link.onclick = () => { if(window.innerWidth <= 800) toggleSidebar(); };
+            
+            yearGroupDiv.appendChild(link);
+
+            const sec = document.createElement("div");
+            sec.id = sid;
+            sec.innerHTML = `<div class="month-title">${ym}</div>`;
+            output.appendChild(sec);
+          }
+
+          const card = document.createElement("div");
+          card.className = "note-card";
+          card.style.borderLeftColor = clr;
+          card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
+          output.appendChild(card);
+        });
+
+        status.innerText = `${rows.length}件の記録を表示中`;
+      } catch (e) {
+        status.innerText = "エラーが発生しました。";
+        errorBox.style.display = "block";
+        errorBox.innerHTML = `<strong>Error:</strong> ${e.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
