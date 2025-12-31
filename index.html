@@ -2,49 +2,112 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>言葉のアーカイブ</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <style>
-    :root { --primary: #546e7a; --sidebar-width: 220px; }
-    body { background-color: #f4f7f6; margin: 0; }
-    main { max-width: 1000px; margin: auto; padding: 40px 20px; }
-    .archive-container { display: flex; gap: 40px; }
+    :root { 
+      --primary: #546e7a; 
+      --bg-color: #f8f9fa;
+    }
+    body { 
+      background-color: var(--bg-color); 
+      margin: 0; 
+      font-size: 16px; /* 標準的なサイズ */
+    }
+    main { 
+      max-width: 100%; 
+      width: 1000px; 
+      margin: auto; 
+      padding: 20px; 
+      box-sizing: border-box; 
+    }
+    .archive-container { 
+      display: flex; 
+      gap: 30px; 
+      width: 100%;
+    }
     
+    /* サイドバーの調整 */
     #sidebar { 
-      width: var(--sidebar-width); position: sticky; top: 40px; 
-      height: calc(100vh - 80px); overflow-y: auto; padding-right: 15px;
+      width: 180px; 
+      position: sticky; 
+      top: 20px; 
+      height: calc(100vh - 40px); 
+      overflow-y: auto; 
+      flex-shrink: 0; /* 幅を維持 */
     }
-    #sidebar h4 { font-size: 0.9em; text-transform: uppercase; color: #999; }
-    .index-link { display: block; padding: 6px 10px; color: #555; text-decoration: none; border-radius: 4px; transition: 0.2s; font-size: 0.85em; }
-    .index-link:hover { background: #e0e6e8; color: var(--primary); }
+    .index-link { 
+      display: block; 
+      padding: 5px 0; 
+      font-size: 0.85rem; 
+      color: #666; 
+      text-decoration: none;
+    }
 
-    #content-area { flex: 1; min-width: 0; }
-    .month-section { margin-top: 60px; }
-    .month-title { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 30px; color: var(--primary); }
-    .note-card { 
-      background: white; padding: 25px; border-radius: 12px; 
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 25px; 
+    /* メインエリアの調整 */
+    #content-area { 
+      flex-grow: 1; 
+      min-width: 0; /* はみ出し防止の魔法のプロパティ */
     }
-    .day-label { font-size: 0.8em; color: #aaa; margin-bottom: 10px; display: block; font-family: monospace; }
-    .note-text { line-height: 1.8; white-space: pre-wrap; font-size: 1.05em; color: #333; }
+    .month-section { margin-top: 40px; }
+    .month-title { 
+      font-size: 1.25rem; 
+      border-bottom: 2px solid var(--primary); 
+      margin-bottom: 20px; 
+    }
     
+    /* カードの調整 */
+    .note-card { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08); 
+      margin-bottom: 20px; 
+      width: 100%;
+      box-sizing: border-box;
+      word-wrap: break-word; /* 長い単語やURLを折り返す */
+      overflow-wrap: break-word;
+    }
+    .day-label { font-size: 0.75rem; color: #999; margin-bottom: 8px; display: block; }
+    .note-text { 
+      line-height: 1.6; 
+      white-space: pre-wrap; 
+      font-size: 1rem; /* 大きすぎないサイズ */
+      color: #333;
+    }
+
+    /* スマホ表示用の設定 */
     @media (max-width: 768px) {
       .archive-container { flex-direction: column; }
-      #sidebar { position: static; width: 100%; height: auto; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
+      #sidebar { 
+        position: static; 
+        width: 100%; 
+        height: auto; 
+        display: flex; 
+        flex-wrap: wrap; 
+        gap: 10px; 
+        background: #eee;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      #sidebar h4 { width: 100%; margin-bottom: 5px; }
+      .index-link { background: white; padding: 4px 10px; border-radius: 4px; }
     }
   </style>
 </head>
 <body>
   <main>
-    <header style="text-align:center; margin-bottom: 50px;">
-      <h1>言葉のアーカイブ</h1>
-      <p id="status" style="font-size:0.8em; color: #888;">データベース準備中...</p>
+    <header>
+      <h2 style="font-size: 1.5rem; text-align: center;">言葉のアーカイブ</h2>
+      <p id="status" style="text-align: center; font-size: 0.8rem;"></p>
     </header>
 
     <div class="archive-container">
       <nav id="sidebar">
-        <h4>年月目次</h4>
+        <h4>Index</h4>
         <div id="index-list"></div>
       </nav>
 
@@ -59,63 +122,48 @@
       const status = document.getElementById("status");
       try {
         const sqlPromise = initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
-        const dataPromise = fetch("database.db").then(res => {
-          if (!res.ok) throw new Error("DBファイルが見つかりません。ファイル名を確認してください。");
-          return res.arrayBuffer();
-        });
+        const dataPromise = fetch("database.db").then(res => res.arrayBuffer());
         const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
         const db = new SQL.Database(new Uint8Array(buf));
 
-        // 日付を降順で取得
         const res = db.exec("SELECT day, content FROM note ORDER BY day DESC");
-        if (!res || res.length === 0) {
-          status.innerText = "データが空です。";
-          return;
-        }
-        
+        if (!res.length) return;
         const rows = res[0].values;
+
         const indexList = document.getElementById("index-list");
         const output = document.getElementById("output");
         let currentMonthStr = "";
 
         rows.forEach(row => {
-          const rawDate = row[0] || ""; // 例: "2016. 05. 11"
+          const rawDate = row[0] || "";
           const content = row[1] || "";
-          
-          // 「2016. 05」の部分だけを抽出（柔軟に対応）
           const match = rawDate.match(/^(\d{4}\.\s?\d{2})/);
           const yearMonth = match ? match[1] : "Other";
 
           if (yearMonth !== currentMonthStr) {
             currentMonthStr = yearMonth;
             const sectionId = "idx-" + yearMonth.replace(/[^0-9]/g, "");
-
-            // サイドバーにリンク追加
             const link = document.createElement("a");
             link.href = "#" + sectionId;
             link.className = "index-link";
             link.innerText = yearMonth;
             indexList.appendChild(link);
 
-            // セクションの見出し作成
             const section = document.createElement("div");
             section.id = sectionId;
             section.className = "month-section";
-            section.innerHTML = `<h3 class="month-title">${yearMonth}</h3>`;
+            section.innerHTML = `<div class="month-title">${yearMonth}</div>`;
             output.appendChild(section);
           }
 
-          // カード追加
           const card = document.createElement("div");
           card.className = "note-card";
           card.innerHTML = `<span class="day-label">${rawDate}</span><div class="note-text">${content}</div>`;
           output.appendChild(card);
         });
-
-        status.innerText = rows.length + " 件の記録を表示中";
+        status.innerText = rows.length + " entries";
       } catch (e) {
-        status.innerText = "エラー: " + e.message;
-        console.error(e);
+        status.innerText = "Error loading database.";
       }
     }
     init();
