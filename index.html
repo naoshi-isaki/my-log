@@ -1,123 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>言葉のアーカイブ</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-  <style>
-    :root { 
-      --primary: #546e7a; 
-      --bg-color: #f8f9fa;
-    }
-    body { 
-      background-color: var(--bg-color); 
-      margin: 0; 
-      font-size: 16px; /* 標準的なサイズ */
-    }
-    main { 
-      max-width: 100%; 
-      width: 1000px; 
-      margin: auto; 
-      padding: 20px; 
-      box-sizing: border-box; 
-    }
-    .archive-container { 
-      display: flex; 
-      gap: 30px; 
-      width: 100%;
-    }
-    
-    /* サイドバーの調整 */
-    #sidebar { 
-      width: 180px; 
-      position: sticky; 
-      top: 20px; 
-      height: calc(100vh - 40px); 
-      overflow-y: auto; 
-      flex-shrink: 0; /* 幅を維持 */
-    }
-    .index-link { 
-      display: block; 
-      padding: 5px 0; 
-      font-size: 0.85rem; 
-      color: #666; 
-      text-decoration: none;
-    }
-
-    /* メインエリアの調整 */
-    #content-area { 
-      flex-grow: 1; 
-      min-width: 0; /* はみ出し防止の魔法のプロパティ */
-    }
-    .month-section { margin-top: 40px; }
-    .month-title { 
-      font-size: 1.25rem; 
-      border-bottom: 2px solid var(--primary); 
-      margin-bottom: 20px; 
-    }
-    
-    /* カードの調整 */
-    .note-card { 
-      background: white; 
-      padding: 20px; 
-      border-radius: 10px; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.08); 
-      margin-bottom: 20px; 
-      width: 100%;
-      box-sizing: border-box;
-      word-wrap: break-word; /* 長い単語やURLを折り返す */
-      overflow-wrap: break-word;
-    }
-    .day-label { font-size: 0.75rem; color: #999; margin-bottom: 8px; display: block; }
-    .note-text { 
-      line-height: 1.6; 
-      white-space: pre-wrap; 
-      font-size: 1rem; /* 大きすぎないサイズ */
-      color: #333;
-    }
-
-    /* スマホ表示用の設定 */
-    @media (max-width: 768px) {
-      .archive-container { flex-direction: column; }
-      #sidebar { 
-        position: static; 
-        width: 100%; 
-        height: auto; 
-        display: flex; 
-        flex-wrap: wrap; 
-        gap: 10px; 
-        background: #eee;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-      }
-      #sidebar h4 { width: 100%; margin-bottom: 5px; }
-      .index-link { background: white; padding: 4px 10px; border-radius: 4px; }
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <header>
-      <h2 style="font-size: 1.5rem; text-align: center;">言葉のアーカイブ</h2>
-      <p id="status" style="text-align: center; font-size: 0.8rem;"></p>
-    </header>
-
-    <div class="archive-container">
-      <nav id="sidebar">
-        <h4>Index</h4>
-        <div id="index-list"></div>
-      </nav>
-
-      <section id="content-area">
-        <div id="output"></div>
-      </section>
-    </div>
-  </main>
-
-  <script>
+<script>
     async function init() {
       const status = document.getElementById("status");
       try {
@@ -135,14 +16,26 @@
         let currentMonthStr = "";
 
         rows.forEach(row => {
-          const rawDate = row[0] || "";
+          let rawDate = (row[0] || "").trim();
           const content = row[1] || "";
-          const match = rawDate.match(/^(\d{4}\.\s?\d{2})/);
-          const yearMonth = match ? match[1] : "Other";
+          
+          // 日付の正規化（全角数字を半角に直し、不要な記号を整理）
+          let normalizedDate = rawDate.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+          
+          // 「YYYY. MM」または「YYYY/MM」または「YYYY-MM」などを抽出する強力な正規表現
+          const match = normalizedDate.match(/^(\d{4})[\.\/\-\s年]\s?(\d{1,2})/);
+          
+          let yearMonth = "Other";
+          if (match) {
+            const year = match[1];
+            const month = match[2].padStart(2, '0'); // 1月を01に揃える
+            yearMonth = `${year}. ${month}`;
+          }
 
           if (yearMonth !== currentMonthStr) {
             currentMonthStr = yearMonth;
             const sectionId = "idx-" + yearMonth.replace(/[^0-9]/g, "");
+            
             const link = document.createElement("a");
             link.href = "#" + sectionId;
             link.className = "index-link";
@@ -167,6 +60,4 @@
       }
     }
     init();
-  </script>
-</body>
-</html>
+</script>
