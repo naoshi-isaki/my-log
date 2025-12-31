@@ -11,132 +11,73 @@
       --primary: #546e7a; 
       --bg-color: #f0f2f5;
       --card-bg: #ffffff;
-      --text-main: #2c3e50;
     }
     
-    /* 全体の箱：はみ出し防止 */
-    html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; scroll-padding-top: 130px; /* スクロール位置の調整 */ }
+    body { background-color: var(--bg-color); font-family: sans-serif; }
+    main { max-width: 1100px; margin: auto; padding: 20px; box-sizing: border-box; }
+    
+    header { margin-bottom: 30px; text-align: center; }
+    header h1 { font-weight: 300; color: var(--primary); }
 
-    body { 
-      background-color: var(--bg-color); 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--text-main);
-    }
-    
-    main { 
-      max-width: 1100px; 
-      margin: auto; 
-      padding: 20px; 
-      box-sizing: border-box; 
-    }
-    
-    header { margin-bottom: 40px; text-align: center; }
-    header h1 { font-weight: 300; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 10px; }
-    #status { font-size: 0.8rem; color: #888; }
-
-    /* レイアウト構造 */
-    .archive-container { 
-      display: flex; 
-      gap: 40px; 
-      align-items: flex-start;
-      width: 100%;
-    }
+    .archive-container { display: flex; gap: 40px; align-items: flex-start; }
 
     /* --- PC用サイドバー --- */
     #sidebar { 
-      width: 220px; 
-      position: sticky; 
-      top: 20px; 
-      max-height: calc(100vh - 40px); 
-      overflow-y: auto; 
-      flex-shrink: 0; 
-      display: block; /* 確実に縦並び */
+      width: 200px; position: sticky; top: 20px; 
+      max-height: calc(100vh - 40px); overflow-y: auto; flex-shrink: 0; 
     }
-
-    #sidebar h4 { 
-      display: block;
-      font-size: 0.7rem; 
-      color: #aaa; 
-      text-transform: uppercase; 
-      letter-spacing: 0.2em; 
-      margin: 0 0 20px 0; 
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 8px;
-    }
+    #sidebar h4 { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.2em; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
     
-    .year-group { margin-bottom: 30px; display: block; }
-    .year-label { 
-      display: block;
-      font-weight: bold; font-size: 1.1rem; color: var(--primary); 
-      margin-bottom: 10px;
-    }
+    .year-group { margin-bottom: 20px; }
+    .year-label { display: block; font-weight: bold; font-size: 1.1rem; color: var(--primary); cursor: pointer; margin-bottom: 10px; }
+    .month-list { display: block; } /* PCでは常に表示 */
     
     .index-link { 
-      display: block; 
-      padding: 5px 15px; 
-      font-size: 0.85rem; 
-      color: #666; 
-      text-decoration: none; 
-      border-left: 2px solid transparent; 
-      transition: 0.2s;
+      display: block; padding: 5px 15px; font-size: 0.85rem; color: #666; 
+      text-decoration: none; border-left: 2px solid transparent; 
     }
-    .index-link:hover { background: #e9ecef; border-left: 2px solid var(--primary); color: var(--primary); }
+    .index-link:hover { background: #e9ecef; border-left: 2px solid var(--primary); }
 
     /* --- メインコンテンツ --- */
     #content-area { flex-grow: 1; min-width: 0; width: 100%; }
-    
-    .month-title { 
-      background: var(--primary); color: white; padding: 6px 20px; 
-      border-radius: 20px; display: inline-block; font-size: 0.9rem; 
-      margin: 40px 0 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .note-card { 
-      background: var(--card-bg); padding: 25px; border-radius: 12px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; 
-      border-left: 8px solid #ccc; 
-      width: 100%;
-      box-sizing: border-box;
-      word-wrap: break-word; 
-      overflow-wrap: break-word;
-    }
-    
-    .day-label { font-size: 0.75rem; color: #999; margin-bottom: 10px; display: block; }
+    .month-title { background: var(--primary); color: white; padding: 6px 20px; border-radius: 20px; display: inline-block; font-size: 0.9rem; margin: 40px 0 20px 0; }
+    .note-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border-left: 8px solid #ccc; width: 100%; box-sizing: border-box; word-wrap: break-word; }
+    .day-label { font-size: 0.75rem; color: #999; display: block; margin-bottom: 10px; }
     .note-text { line-height: 1.8; white-space: pre-wrap; font-size: 1rem; color: #333; }
 
-    #error-box { background: #fee; color: #c00; padding: 15px; border-radius: 8px; display: none; margin-bottom: 20px; }
-
-    /* --- スマホ表示 (800px以下) --- */
+    /* --- スマホ表示最適化 (800px以下) --- */
     @media (max-width: 800px) {
-      main { padding: 15px; }
-      .archive-container { flex-direction: column; gap: 20px; }
-      
+      header { margin-top: 100px; } /* 固定ヘッダーの分だけ下げる */
+
       #sidebar { 
-        position: static; width: 100%; max-height: none; 
-        background: #fff; padding: 15px; border-radius: 12px; box-sizing: border-box;
+        position: fixed; top: 0; left: 0; width: 100%; height: auto; 
+        max-height: 80vh; z-index: 1000; background: #fff; 
+        padding: 10px 15px; border-bottom: 2px solid var(--primary); 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-y: auto;
       }
       
-      /* スマホでは「年」の下にボタンを横並びにする */
-      .year-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 20px; }
-      .year-label { width: 100%; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+      #sidebar h4 { display: none; } /* スマホでは見出し非表示 */
       
-      .index-link { 
-        border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; 
-        background: #fdfdfd; margin: 0; border-left: 1px solid #ddd;
-      }
+      .year-group { margin-bottom: 5px; border-bottom: 1px solid #f0f0f0; padding: 5px 0; }
       
-      .note-card { padding: 18px; }
+      /* 年ラベルをタップ可能に */
+      .year-label { margin: 0; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
+      .year-label::after { content: '▼'; font-size: 0.6rem; color: #ccc; }
+      .year-group.open .year-label::after { content: '▲'; }
+
+      /* 月リストをデフォルトで隠す */
+      .month-list { display: none; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+      .year-group.open .month-list { display: flex; }
+      
+      .index-link { border: 1px solid #ddd; border-radius: 6px; padding: 5px 12px; background: #fafafa; }
     }
   </style>
 </head>
 <body>
   <main>
-    <header>
-      <h1>Words Archive</h1>
-      <div id="error-box"></div>
-      <p id="status">データベースを準備中...</p>
-    </header>
-
+    <div id="error-box" style="display:none; background:#fee; color:#c00; padding:15px; border-radius:8px; margin-bottom:20px;"></div>
+    
     <div class="archive-container">
       <nav id="sidebar">
         <h4>Time Index</h4>
@@ -144,6 +85,10 @@
       </nav>
 
       <section id="content-area">
+        <header>
+          <h1>Words Archive</h1>
+          <p id="status" style="font-size:0.8rem; color:#888;">DB準備中...</p>
+        </header>
         <div id="output"></div>
       </section>
     </div>
@@ -154,26 +99,24 @@
 
     async function init() {
       const status = document.getElementById("status");
-      const errorBox = document.getElementById("error-box");
       const indexList = document.getElementById("index-list");
       const output = document.getElementById("output");
 
       try {
         const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
-        
         const response = await fetch("database.db");
         if (!response.ok) throw new Error("database.dbが見つかりません。");
-        
         const buf = await response.arrayBuffer();
         const db = new SQL.Database(new Uint8Array(buf));
         
         const res = db.exec("SELECT day, content, marker_color FROM note ORDER BY day DESC");
-        if (!res.length || !res[0].values.length) throw new Error("データがありません。");
+        if (!res.length) throw new Error("データがありません。");
 
         const rows = res[0].values;
         let currentYear = "";
         let currentYM = "";
         let yearGroupDiv = null;
+        let monthListDiv = null;
 
         rows.forEach(row => {
           let rawD = (row[0] || "").trim();
@@ -187,25 +130,41 @@
           let m = match ? match[2].padStart(2, '0') : "";
           let ym = match ? `${y}. ${m}` : "Other";
 
-          // 年グループの作成
+          // 年グループ
           if (y !== currentYear) {
             currentYear = y;
             yearGroupDiv = document.createElement("div");
             yearGroupDiv.className = "year-group";
-            yearGroupDiv.innerHTML = `<span class="year-label">${y}</span>`;
+            
+            const yLabel = document.createElement("span");
+            yLabel.className = "year-label";
+            yLabel.innerText = y;
+            // スマホ用クリックイベント
+            yLabel.onclick = () => {
+              if (window.innerWidth <= 800) yearGroupDiv.classList.toggle('open');
+            };
+            
+            monthListDiv = document.createElement("div");
+            monthListDiv.className = "month-list";
+            
+            yearGroupDiv.appendChild(yLabel);
+            yearGroupDiv.appendChild(monthListDiv);
             indexList.appendChild(yearGroupDiv);
           }
 
-          // 月見出しとインデックス作成
+          // 月リンク
           if (ym !== currentYM) {
             currentYM = ym;
             const sid = "idx-" + ym.replace(/[^0-9]/g, "");
-            
             const link = document.createElement("a");
             link.href = "#" + sid;
             link.className = "index-link";
             link.innerText = match ? `${m}月` : "Other";
-            yearGroupDiv.appendChild(link);
+            // タップしたら閉じる（スマホ用）
+            link.onclick = () => {
+              if (window.innerWidth <= 800) yearGroupDiv.classList.remove('open');
+            };
+            monthListDiv.appendChild(link);
 
             const sec = document.createElement("div");
             sec.id = sid;
@@ -220,12 +179,9 @@
           output.appendChild(card);
         });
 
-        status.innerText = `${rows.length}件の記録を表示中`;
+        status.innerText = `${rows.length}件表示中`;
       } catch (e) {
-        status.innerText = "エラーが発生しました。";
-        errorBox.style.display = "block";
-        errorBox.innerHTML = `<strong>Error:</strong> ${e.message}`;
-        console.error(e);
+        status.innerText = "Error: " + e.message;
       }
     }
   </script>
