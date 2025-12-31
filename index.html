@@ -1,531 +1,314 @@
 <!DOCTYPE html>
-
 <html lang="ja">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <title>Words Archive</title>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-
   <style>
-
     :root { 
-
       --primary: #546e7a; 
-
       --bg-color: #f0f2f5;
-
       --card-bg: #ffffff;
-
       --text-main: #2c3e50;
-
     }
-
     
-
-    /* ジャンプした時にタイトルがヘッダーに隠れないように調整 */
-
-    html { scroll-padding-top: 80px; }
-
+    html { scroll-padding-top: 100px; }
     html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
 
-
-
     body { 
-
       background-color: var(--bg-color); 
-
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
       color: var(--text-main);
-
     }
-
     
-
     main { max-width: 1100px; margin: auto; padding: 20px; box-sizing: border-box; }
-
     
-
-    header { margin-bottom: 40px; text-align: center; }
-
+    header { margin-bottom: 20px; text-align: center; }
     header h1 { font-weight: 300; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 10px; }
-
     #status { font-size: 0.8rem; color: #888; }
 
-
-
-    /* レイアウト構造 */
+    /* 検索ウィンドウのスタイル */
+    .search-container {
+      margin-bottom: 30px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #search-input {
+      border-radius: 25px;
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
 
     .archive-container { 
-
       display: flex; 
-
       gap: 40px; 
-
       align-items: flex-start;
-
       width: 100%;
-
     }
 
-
-
-    /* --- 【PC用】サイドバーの設定 --- */
-
+    /* --- 【PC用】サイドバーの設定（スクロール追従） --- */
     #sidebar { 
-
       width: 220px; 
-
       position: sticky; 
-
       top: 20px; 
-
       max-height: calc(100vh - 40px); 
-
       overflow-y: auto; 
-
       flex-shrink: 0; 
-
       display: block; 
-
       background: transparent;
-
       z-index: 10;
-
     }
-
-
 
     #sidebar h4 { 
-
       display: block;
-
       font-size: 0.7rem; 
-
       color: #aaa; 
-
       text-transform: uppercase; 
-
       letter-spacing: 0.2em; 
-
       margin: 0 0 20px 0; 
-
       border-bottom: 1px solid #ddd;
-
       padding-bottom: 8px;
-
     }
-
     
-
-    .year-group { margin-bottom: 30px; display: block; }
-
+    .year-group { margin-bottom: 15px; }
     .year-label { 
-
-      display: block;
-
-      font-weight: bold; font-size: 1.1rem; color: var(--primary); 
-
-      margin-bottom: 10px;
-
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold; 
+      font-size: 1.1rem; 
+      color: var(--primary); 
+      margin-bottom: 5px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 6px;
     }
+    .year-label:hover { background: rgba(0,0,0,0.05); }
+    .year-label::after { content: '▼'; font-size: 0.6rem; transition: 0.3s; color: #bbb; }
+    .year-group.active .year-label::after { transform: rotate(180deg); color: var(--primary); }
 
+    /* 月リスト：デフォルト非表示（activeクラスで表示） */
+    .month-list { 
+      display: none; 
+      flex-direction: column; 
+      padding-left: 10px;
+      margin-bottom: 15px;
+    }
+    .year-group.active .month-list { display: flex; }
     
-
     .index-link { 
-
       display: block; 
-
       padding: 5px 15px; 
-
       font-size: 0.85rem; 
-
       color: #666; 
-
       text-decoration: none; 
-
       border-left: 2px solid transparent; 
-
       transition: 0.2s;
-
     }
-
     .index-link:hover { background: #e9ecef; border-left: 2px solid var(--primary); color: var(--primary); }
 
-
-
     /* --- メインコンテンツ --- */
-
     #content-area { flex-grow: 1; min-width: 0; width: 100%; }
-
     
-
     .month-title { 
-
       background: var(--primary); color: white; padding: 6px 20px; 
-
       border-radius: 20px; display: inline-block; font-size: 0.9rem; 
-
       margin: 40px 0 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
     }
 
-
+    /* 検索で隠すためのクラス */
+    .hidden { display: none !important; }
 
     .note-card { 
-
       background: var(--card-bg); padding: 25px; border-radius: 12px; 
-
       box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; 
-
       border-left: 8px solid #ccc; 
-
       width: 100%;
-
       box-sizing: border-box;
-
       word-wrap: break-word; 
-
       overflow-wrap: break-word;
-
     }
-
     
-
     .day-label { font-size: 0.75rem; color: #999; margin-bottom: 10px; display: block; }
-
     .note-text { line-height: 1.8; white-space: pre-wrap; font-size: 1rem; color: #333; }
-
-
 
     #error-box { background: #fee; color: #c00; padding: 15px; border-radius: 8px; display: none; margin-bottom: 20px; }
 
-
-
     /* --- 【スマホ用】表示設定 (800px以下) --- */
-
     @media (max-width: 800px) {
-
-      body { padding-top: 60px; } /* 固定ヘッダーの高さ分、本体を下げる */
-
-      
-
+      body { padding-top: 60px; }
       .archive-container { flex-direction: column; gap: 20px; }
-
       
-
       #sidebar { 
-
         position: fixed; 
-
-        top: 0; 
-
-        left: 0; 
-
-        width: 100%; 
-
-        height: auto; 
-
-        max-height: 80vh; 
-
-        background: #fff; 
-
-        padding: 10px 20px; 
-
+        top: 0; left: 0; 
+        width: 100%; height: auto; max-height: 80vh; 
+        background: #fff; padding: 10px 20px; 
         border-bottom: 2px solid var(--primary);
-
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-
         z-index: 1000;
-
-        overflow-y: auto;
-
-      }
-
-
-
-      /* スマホではh4を「開閉ボタン」にする */
-
-      #sidebar h4 { 
-
-        margin: 0; 
-
-        padding: 5px 0; 
-
-        font-size: 0.8rem; 
-
-        color: var(--primary); 
-
-        border: none; 
-
-        cursor: pointer;
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
       }
 
       #sidebar h4::after { content: '▼ INDEX OPEN'; font-weight: bold; font-size: 0.7rem; }
-
       #sidebar.open h4::after { content: '▲ CLOSE'; }
-
-
-
-      /* デフォルトは非表示、openクラスがついたら表示 */
-
       #index-list { display: none; margin-top: 15px; }
-
       #sidebar.open #index-list { display: block; }
 
-
-
-      .year-group { 
-
-        display: flex; flex-wrap: wrap; gap: 8px; align-items: center; 
-
-        margin-bottom: 15px; border-top: 1px solid #eee; padding-top: 10px;
-
-      }
-
-      .year-label { width: 100%; font-size: 0.9rem; margin-bottom: 5px; color: #333; }
-
-      .index-link { 
-
-        border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; 
-
-        background: #fdfdfd; margin: 0; 
-
-      }
-
-      .note-card { padding: 18px; }
-
+      .year-group { border-top: 1px solid #eee; padding-top: 10px; margin-bottom: 10px; }
+      .year-label { font-size: 0.95rem; }
+      .month-list { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+      .index-link { border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; background: #fdfdfd; margin: 0; }
     }
-
   </style>
-
 </head>
-
 <body>
-
   <main>
+    <header>
+      <h1>Words Archive</h1>
+      <div id="error-box"></div>
+      <p id="status">読み込み中...</p>
+    </header>
 
-    <div class="archive-container">
-
-      <nav id="sidebar">
-
-        <h4 onclick="toggleSidebar()">Time Index</h4>
-
-        <div id="index-list"></div>
-
-      </nav>
-
-
-
-      <section id="content-area">
-
-        <header>
-
-          <h1>Words Archive</h1>
-
-          <div id="error-box"></div>
-
-          <p id="status">読み込み中...</p>
-
-        </header>
-
-        <div id="output"></div>
-
-      </section>
-
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="アーカイブ内を検索..." oninput="filterNotes()">
     </div>
 
+    <div class="archive-container">
+      <nav id="sidebar">
+        <h4 onclick="toggleSidebar()">Time Index</h4>
+        <div id="index-list"></div>
+      </nav>
+
+      <section id="content-area">
+        <div id="output"></div>
+      </section>
+    </div>
   </main>
 
-
-
   <script>
-
-    // スマホ用：サイドバーの表示・非表示を切り替える
-
     function toggleSidebar() {
-
       if (window.innerWidth <= 800) {
-
         document.getElementById('sidebar').classList.toggle('open');
-
       }
-
     }
 
+    // 検索フィルタリング機能
+    function filterNotes() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const cards = document.querySelectorAll('.note-card');
+      const titles = document.querySelectorAll('.month-title');
 
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.classList.toggle('hidden', !text.includes(query));
+      });
+
+      // カードが全て隠れた月のタイトルも隠す
+      titles.forEach(title => {
+        let next = title.nextElementSibling;
+        let hasVisibleCard = false;
+        while (next && next.classList.contains('note-card')) {
+          if (!next.classList.contains('hidden')) {
+            hasVisibleCard = true;
+            break;
+          }
+          next = next.nextElementSibling;
+        }
+        title.classList.toggle('hidden', !hasVisibleCard);
+      });
+    }
 
     window.addEventListener('DOMContentLoaded', init);
 
-
-
     async function init() {
-
       const status = document.getElementById("status");
-
       const errorBox = document.getElementById("error-box");
-
       const indexList = document.getElementById("index-list");
-
       const output = document.getElementById("output");
 
-
-
       try {
-
         const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
-
         const response = await fetch("database.db");
-
         if (!response.ok) throw new Error("database.dbが見つかりません。");
-
         const buf = await response.arrayBuffer();
-
         const db = new SQL.Database(new Uint8Array(buf));
-
         
-
         const res = db.exec("SELECT day, content, marker_color FROM note ORDER BY day DESC");
-
         if (!res.length || !res[0].values.length) throw new Error("表示データがありません。");
 
-
-
         const rows = res[0].values;
-
         let currentYear = "";
-
         let currentYM = "";
-
         let yearGroupDiv = null;
-
-
+        let monthListDiv = null;
 
         rows.forEach(row => {
-
           let rawD = (row[0] || "").trim();
-
           let txt = row[1] || "";
-
           let clr = row[2] || "#cccccc";
-
           
-
           let norm = rawD.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/\s+/g, " ");
-
           const match = norm.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})/);
-
           
-
           let y = match ? match[1] : "Other";
-
           let m = match ? match[2].padStart(2, '0') : "";
-
           let ym = match ? `${y}. ${m}` : "Other";
 
-
-
           if (y !== currentYear) {
-
             currentYear = y;
-
             yearGroupDiv = document.createElement("div");
-
             yearGroupDiv.className = "year-group";
+            
+            const yLabel = document.createElement("div");
+            yLabel.className = "year-label";
+            yLabel.innerText = y;
+            yLabel.onclick = () => yearGroupDiv.classList.toggle('active');
 
-            yearGroupDiv.innerHTML = `<span class="year-label">${y}</span>`;
-
+            monthListDiv = document.createElement("div");
+            monthListDiv.className = "month-list";
+            
+            yearGroupDiv.appendChild(yLabel);
+            yearGroupDiv.appendChild(monthListDiv);
             indexList.appendChild(yearGroupDiv);
-
           }
-
-
 
           if (ym !== currentYM) {
-
             currentYM = ym;
-
             const sid = "idx-" + ym.replace(/[^0-9]/g, "");
-
             
-
             const link = document.createElement("a");
-
             link.href = "#" + sid;
-
             link.className = "index-link";
-
             link.innerText = match ? `${m}月` : "Other";
-
-            
-
-            // スマホ：月リンクをクリックしたらメニューを閉じる
-
             link.onclick = () => { if(window.innerWidth <= 800) toggleSidebar(); };
-
             
-
-            yearGroupDiv.appendChild(link);
-
-
+            monthListDiv.appendChild(link);
 
             const sec = document.createElement("div");
-
             sec.id = sid;
-
-            sec.innerHTML = `<div class="month-title">${ym}</div>`;
-
+            sec.className = "month-title";
+            sec.innerText = ym;
             output.appendChild(sec);
-
           }
 
-
-
           const card = document.createElement("div");
-
           card.className = "note-card";
-
           card.style.borderLeftColor = clr;
-
           card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
-
           output.appendChild(card);
-
         });
 
-
-
         status.innerText = `${rows.length}件表示中`;
-
       } catch (e) {
-
         status.innerText = "エラーが発生しました。";
-
         errorBox.style.display = "block";
-
         errorBox.innerHTML = `<strong>Error:</strong> ${e.message}`;
-
       }
-
     }
-
   </script>
-
 </body>
-
 </html>
