@@ -13,7 +13,8 @@
       --card-bg: #ffffff;
     }
     
-    html { scroll-padding-top: 100px; }
+    /* ジャンプ位置の微調整（ヘッダーに重ならないように） */
+    html { scroll-padding-top: 80px; scroll-behavior: smooth; }
     body { background-color: var(--bg-color); font-family: -apple-system, sans-serif; margin: 0; padding-top: 65px; }
 
     /* --- フル画面・目次オーバーレイ --- */
@@ -33,51 +34,26 @@
     }
     #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; }
     #sidebar-toggle h4::after { content: 'INDEX'; font-size: 0.6rem; margin-left: 12px; border: 1px solid var(--primary); padding: 1px 6px; border-radius: 3px; }
+    #sidebar.open #sidebar-toggle h4::after { content: 'CLOSE'; background: var(--primary); color: #fff; }
 
-    /* 【重要】目次の中身：横並びグリッドを強制適用 */
-    #index-container { 
-      max-width: 1400px; 
-      margin: 100px auto 60px; 
-      padding: 0 40px; 
-    }
-    
+    /* 目次の中身：横並びグリッド */
+    #index-container { max-width: 1400px; margin: 100px auto 60px; padding: 0 40px; }
     #index-list { 
       display: grid !important; 
-      /* PC幅なら最小260pxのカードを自動で横に並べる */
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-      gap: 30px; 
-      width: 100%;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+      gap: 30px; width: 100%;
     }
 
-    /* 各年グループのカード */
-    .year-group { 
-      background: #fff; 
-      padding: 20px; 
-      border-radius: 12px; 
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
-      border: 1px solid #f0f0f0;
-      height: fit-content; 
-      display: block; 
-    }
+    .year-group { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; height: fit-content; }
+    .year-label { font-weight: bold; font-size: 1.3rem; color: var(--primary); margin-bottom: 15px; display: block; border-bottom: 2px solid #f5f5f5; padding-bottom: 8px; text-align: center; }
 
-    .year-label { 
-      font-weight: bold; font-size: 1.3rem; color: var(--primary); 
-      margin-bottom: 15px; display: block; border-bottom: 2px solid #f5f5f5; 
-      padding-bottom: 8px; text-align: center;
-    }
-
-    /* ミニカレンダー（数字のみ・4列） */
-    .month-list { 
-      display: grid !important; 
-      grid-template-columns: repeat(4, 1fr) !important; 
-      gap: 8px; 
-    }
+    .month-list { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px; }
     .index-link { 
       display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1;
       background: #fcfdfe; text-decoration: none; color: #666; font-size: 0.8rem; 
       border-radius: 6px; border: 1px solid #eee; transition: 0.2s;
     }
-    .index-link:hover { background: var(--primary); color: #fff; transform: scale(1.05); }
+    .index-link:hover { background: var(--primary); color: #fff; }
 
     /* --- メインコンテンツ --- */
     main { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
@@ -92,8 +68,9 @@
     .hidden { display: none !important; }
 
     @media (max-width: 600px) { 
-      #index-list { grid-template-columns: 1fr !important; } 
-      #index-container { padding: 0 20px; }
+      #index-list { grid-template-columns: repeat(2, 1fr) !important; gap: 15px; } /* スマホでも横に2つ並べる */
+      #index-container { padding: 0 20px; margin-top: 80px; }
+      .index-link { font-size: 0.9rem; } /* スマホは少し大きく */
     }
   </style>
 </head>
@@ -119,6 +96,7 @@
 
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
+      // メニューが開いている時は背面スクロールを禁止
       document.body.style.overflow = isOpen ? 'hidden' : '';
     }
 
@@ -195,22 +173,20 @@
             const sid = "idx-" + ym.replace(/[^0-9]/g, "");
             const link = document.createElement("a");
             link.href = "#" + sid; link.className = "index-link"; link.innerText = match ? m : "??";
-            link.onclick = (e) => { e.stopPropagation(); closeMenu(); };
+            
+            // 【スマホ対策】タップ時の挙動を修正
+            link.onclick = (e) => {
+              e.preventDefault(); // 一旦デフォルトのジャンプを止める
+              const target = document.getElementById(sid);
+              if (target) {
+                closeMenu(); // まずメニューを閉じる
+                // メニューが閉じるアニメーション（0.4s）を待たずにジャンプを実行
+                setTimeout(() => {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                }, 50); 
+              }
+            };
+            
             activeMonthList.appendChild(link);
 
-            const sec = document.createElement("div");
-            sec.id = sid; sec.className = "month-title"; sec.innerText = ym;
-            output.appendChild(sec);
-          }
-
-          const card = document.createElement("div");
-          card.className = "note-card"; card.style.borderLeftColor = clr;
-          card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
-          output.appendChild(card);
-        });
-      } catch (e) { console.error(e); }
-    }
-    window.onload = init;
-  </script>
-</body>
-</html>
+            const sec = document.
