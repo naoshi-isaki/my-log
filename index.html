@@ -22,24 +22,61 @@
     .archive-container { display: flex; gap: 40px; align-items: flex-start; }
 
     /* サイドバーのデザイン改善 */
+    /* サイドバー全体の配置 */
     #sidebar { 
-      width: 200px; position: sticky; top: 20px; 
-      max-height: calc(100vh - 40px); overflow-y: auto; 
-      flex-shrink: 0; padding-right: 10px;
+      width: 220px; 
+      position: sticky; 
+      top: 40px; 
+      max-height: calc(100vh - 60px); 
+      overflow-y: auto; 
+      flex-shrink: 0; 
+      padding: 0 20px 20px 0; /* 左側の余白を詰め、右に余裕を */
     }
-    #sidebar h4 { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 20px; }
+
+    /* 「Time Index」見出し：独立したラベルとして上に配置 */
+    #sidebar h4 { 
+      font-size: 0.7rem; 
+      color: #999; 
+      text-transform: uppercase; 
+      letter-spacing: 0.2em; 
+      margin: 0 0 20px 0; /* 下にしっかり隙間を作る */
+      display: block; /* 確実に独立した行にする */
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+    }
     
-    .year-group { margin-bottom: 20px; }
+    .year-group { 
+      margin-bottom: 30px; 
+      display: block; /* 縦に並べる */
+    }
+
+    /* 年のラベル：数字を独立させて目立たせる */
     .year-label { 
-      font-weight: bold; font-size: 0.9rem; color: #333; 
-      border-bottom: 1px solid #ddd; margin-bottom: 8px; padding-bottom: 2px;
-      display: block;
+      font-weight: bold; 
+      font-size: 1.1rem; 
+      color: var(--primary); 
+      margin-bottom: 12px; 
+      display: block; /* 確実に次の行（月）を下に下げる */
     }
+
+    /* 月のリンク：年の下に縦に並べる */
     .index-link { 
-      display: block; padding: 4px 12px; font-size: 0.85rem; color: #666; 
-      text-decoration: none; border-left: 2px solid transparent; transition: 0.2s;
+      display: block; /* 1つずつ改行させる */
+      padding: 5px 15px; 
+      font-size: 0.85rem; 
+      color: #666; 
+      text-decoration: none; 
+      border-left: 1px solid #eee; 
+      transition: 0.3s;
+      margin-left: 5px; /* 年の数字より少し右にずらして親子関係を作る */
     }
-    .index-link:hover { background: #e9ecef; border-left: 2px solid var(--primary); color: var(--primary); }
+
+    .index-link:hover { 
+      background: #fff; 
+      border-left: 3px solid var(--primary); 
+      color: var(--primary); 
+      padding-left: 13px;
+    }
 
     /* メインエリア */
     #content-area { flex-grow: 1; min-width: 0; }
