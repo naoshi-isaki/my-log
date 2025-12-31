@@ -98,6 +98,83 @@
       .note-card { padding: 20px; }
       body { padding-top: 60px; }
     }
+    /* --- INDEXリスト（開いた時のデザイン） --- */
+    #index-list { 
+      display: none; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 40px 20px 60px; 
+    }
+    #sidebar.open #index-list { 
+      display: block; 
+    }
+
+    /* 年のセクション */
+    .year-group { 
+      margin-bottom: 40px; 
+      animation: fadeIn 0.5s ease; /* ふわっと表示 */
+    }
+
+    .year-label { 
+      font-size: 1.5rem; 
+      font-weight: 300; 
+      color: var(--primary); 
+      border-bottom: 1px solid #eee; 
+      margin-bottom: 20px; 
+      padding-bottom: 10px;
+      display: block;
+      letter-spacing: 0.1em;
+    }
+
+    /* 月のタイルレイアウト */
+    .month-list { 
+      display: grid; 
+      grid-template-columns: repeat(6, 1fr); /* PCでは1行に6ヶ月 */
+      gap: 12px; 
+    }
+
+    .index-link { 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 45px;
+      background: #fff; 
+      border: 1px solid #e0e0e0;
+      text-decoration: none; 
+      color: #666; 
+      font-size: 0.85rem; 
+      border-radius: 4px; 
+      transition: all 0.2s ease;
+    }
+
+    .index-link:hover { 
+      background: var(--primary); 
+      color: #fff; 
+      border-color: var(--primary);
+      transform: translateY(-2px); /* 少し浮き上がる */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* フェードインアニメーション */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- スマホ用の調整 --- */
+    @media (max-width: 600px) {
+      .month-list { 
+        grid-template-columns: repeat(4, 1fr); /* スマホでは1行に4ヶ月 */
+        gap: 8px;
+      }
+      .year-label {
+        font-size: 1.2rem;
+      }
+      .index-link {
+        height: 40px;
+        font-size: 0.8rem;
+      }
+    }
   </style>
 </head>
 <body>
