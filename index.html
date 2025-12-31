@@ -21,54 +21,54 @@
 
     .archive-container { display: flex; gap: 40px; align-items: flex-start; }
 
-    /* サイドバーのデザイン改善 */
     /* サイドバー全体の配置 */
     #sidebar { 
-      width: 220px; 
+      width: 200px; 
       position: sticky; 
       top: 40px; 
-      max-height: calc(100vh - 60px); 
+      max-height: calc(100vh - 80px); 
       overflow-y: auto; 
       flex-shrink: 0; 
-      padding: 0 20px 20px 0; /* 左側の余白を詰め、右に余裕を */
+      display: block; /* 確実に縦並びにする */
     }
 
-    /* 「Time Index」見出し：独立したラベルとして上に配置 */
+    /* 「TIME INDEX」見出しを一番上に配置 */
     #sidebar h4 { 
-      font-size: 0.7rem; 
+      display: block; 
+      font-size: 0.75rem; 
       color: #999; 
       text-transform: uppercase; 
-      letter-spacing: 0.2em; 
-      margin: 0 0 20px 0; /* 下にしっかり隙間を作る */
-      display: block; /* 確実に独立した行にする */
+      letter-spacing: 0.15em; 
+      margin: 0 0 20px 0; /* 下に隙間を作って数字と離す */
       border-bottom: 1px solid #ddd;
       padding-bottom: 8px;
     }
     
     .year-group { 
+      display: block; 
       margin-bottom: 30px; 
-      display: block; /* 縦に並べる */
+      text-align: left;
     }
 
-    /* 年のラベル：数字を独立させて目立たせる */
+    /* 「2025」などの数字を独立した行に */
     .year-label { 
+      display: block;
       font-weight: bold; 
       font-size: 1.1rem; 
       color: var(--primary); 
       margin-bottom: 12px; 
-      display: block; /* 確実に次の行（月）を下に下げる */
     }
 
-    /* 月のリンク：年の下に縦に並べる */
+    /* 月のリンクも1つずつ縦に並べる */
     .index-link { 
-      display: block; /* 1つずつ改行させる */
-      padding: 5px 15px; 
+      display: block; 
+      padding: 6px 15px; 
       font-size: 0.85rem; 
       color: #666; 
       text-decoration: none; 
       border-left: 1px solid #eee; 
-      transition: 0.3s;
-      margin-left: 5px; /* 年の数字より少し右にずらして親子関係を作る */
+      margin-left: 5px; /* 年の数字より少し右に寄せて親子関係を作る */
+      transition: 0.2s;
     }
 
     .index-link:hover { 
