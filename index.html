@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Life Log Archive</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; }
+    .note { border-bottom: 1px solid #eee; padding: 10px 0; }
+    .day { color: #888; font-size: 0.9em; }
+    .content { white-space: pre-wrap; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h1>言葉のアーカイブ (from DB)</h1>
+  <div id="status">読み込み中...</div>
+  <div id="output"></div>
+
+  <script>
+    async function loadDB() {
+      const sqlPromise = initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
+      const dataPromise = fetch("database.db").then(res => res.arrayBuffer());
+      const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
+      const db = new SQL.Database(new Uint8Array(buf));
+
+      // noteテーブルからデータを取得
+      const res = db.exec("SELECT day, content FROM note ORDER BY day DESC");
+      const rows = res[0].values;
+
+      const output = document.getElementById("output");
+      document.getElementById("status").innerText = `${rows.length} 件の記録が見つかりました`;
+
+      rows.forEach(row => {
+        const div = document.createElement("div");
+        div.className = "note";
+        div.innerHTML = `<div class="day">${row[0]}</div><div class="content">${row[1]}</div>`;
+        output.appendChild(div);
+      });
+    }
+    loadDB();
+  </script>
+</body>
+</html>
