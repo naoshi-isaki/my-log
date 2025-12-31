@@ -32,55 +32,45 @@
 
     .archive-container { display: flex; gap: 40px; align-items: flex-start; width: 100%; }
 
-    /* --- PC用サイドバー --- */
+    /* --- サイドバー（PC・スマホ共通） --- */
     #sidebar { 
-      width: 200px; 
-      position: sticky; 
-      top: 20px; 
-      max-height: calc(100vh - 40px); 
-      overflow-y: auto; 
-      flex-shrink: 0; 
-      display: flex;
-      flex-direction: column; /* 縦に並べる */
-      z-index: 10;
+      width: 220px; position: sticky; top: 20px; 
+      max-height: calc(100vh - 40px); overflow-y: auto; flex-shrink: 0; 
+      display: flex; flex-direction: column; z-index: 10;
     }
 
-    /* TIME INDEX見出し */
     #sidebar h4 { 
-      font-size: 0.75rem; 
-      color: #999; 
-      text-transform: uppercase; 
-      letter-spacing: 0.2em; 
-      margin: 0 0 15px 0; 
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 10px;
-      cursor: default;
+      font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; 
+      margin: 0 0 15px 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;
     }
     
-    .year-group { margin-bottom: 25px; display: block; width: 100%; }
+    .year-group { margin-bottom: 15px; display: block; width: 100%; }
     
-    /* 2025などの年ラベル */
+    /* 年ラベル：クリックで開閉 */
     .year-label { 
-      display: block;
-      font-weight: bold; font-size: 1.1rem; color: var(--primary); 
-      margin-bottom: 10px;
-      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: bold; font-size: 1rem; color: var(--primary); 
+      margin-bottom: 5px; cursor: pointer; padding: 5px; border-radius: 4px;
+      transition: background 0.2s;
     }
-    
-    /* 月の縦リスト */
-    .month-list { display: flex; flex-direction: column; gap: 2px; }
+    .year-label:hover { background: #e9ecef; }
+    .year-label::after { content: '▼'; font-size: 0.6rem; color: #bbb; transition: 0.3s; }
+    .year-group.active .year-label::after { transform: rotate(180deg); }
+
+    /* 月の縦リスト：デフォルト非表示 */
+    .month-list { 
+      display: none; flex-direction: column; gap: 2px; 
+      padding-left: 15px; /* インデント */
+      margin-top: 5px;
+    }
+    .year-group.active .month-list { display: flex; }
 
     .index-link { 
-      display: block; 
-      padding: 6px 15px; 
-      font-size: 0.85rem; 
-      color: #666; 
-      text-decoration: none; 
-      border-left: 2px solid transparent; 
-      transition: all 0.2s;
+      display: block; padding: 6px 15px; font-size: 0.85rem; color: #666; 
+      text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s;
     }
     .index-link:hover { background: #e9ecef; border-left: 2px solid var(--primary); color: var(--primary); }
-   
+
     /* --- メインコンテンツ --- */
     #content-area { flex-grow: 1; min-width: 0; width: 100%; }
     .month-title { background: var(--primary); color: white; padding: 6px 20px; border-radius: 20px; display: inline-block; font-size: 0.9rem; margin: 40px 0 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
