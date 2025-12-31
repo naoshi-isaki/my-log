@@ -98,81 +98,77 @@
       .note-card { padding: 20px; }
       body { padding-top: 60px; }
     }
-    /* --- INDEXリスト（開いた時のデザイン） --- */
+   /* --- INDEXリスト：無駄を削ぎ落とした高密度レイアウト --- */
     #index-list { 
       display: none; 
-      max-width: 800px; 
+      max-width: 1200px; /* 幅を広げる */
       margin: 0 auto; 
-      padding: 40px 20px 60px; 
+      padding: 20px; /* 上下の無駄な余白をカット */
+      /* PCでは2列に並べる */
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 20px;
     }
     #sidebar.open #index-list { 
-      display: block; 
+      display: grid; 
     }
 
-    /* 年のセクション */
     .year-group { 
-      margin-bottom: 40px; 
-      animation: fadeIn 0.5s ease; /* ふわっと表示 */
+      margin-bottom: 0; 
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
     }
 
     .year-label { 
-      font-size: 1.5rem; 
-      font-weight: 300; 
+      font-size: 1.2rem; 
+      font-weight: 600; 
       color: var(--primary); 
-      border-bottom: 1px solid #eee; 
-      margin-bottom: 20px; 
-      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0; 
+      margin-bottom: 15px; 
+      padding-bottom: 5px;
       display: block;
-      letter-spacing: 0.1em;
     }
 
-    /* 月のタイルレイアウト */
+    /* 月のタイルをコンパクトに */
     .month-list { 
       display: grid; 
-      grid-template-columns: repeat(6, 1fr); /* PCでは1行に6ヶ月 */
-      gap: 12px; 
+      grid-template-columns: repeat(6, 1fr); /* 常に6列 */
+      gap: 6px; 
     }
 
     .index-link { 
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 45px;
-      background: #fff; 
-      border: 1px solid #e0e0e0;
+      height: 34px; /* 高さを抑える */
+      background: #f9fafb; 
+      border: 1px solid #e5e7eb;
       text-decoration: none; 
-      color: #666; 
-      font-size: 0.85rem; 
+      color: #4b5563; 
+      font-size: 0.8rem; 
       border-radius: 4px; 
-      transition: all 0.2s ease;
     }
 
-    .index-link:hover { 
-      background: var(--primary); 
-      color: #fff; 
-      border-color: var(--primary);
-      transform: translateY(-2px); /* 少し浮き上がる */
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    /* メインコンテンツの無駄な余白も調整 */
+    main { 
+      max-width: 1000px; /* 本文の幅も少し広げる */
+      padding: 20px; 
     }
 
-    /* フェードインアニメーション */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .month-title { 
+      margin: 40px 0 20px; /* 上の余白を80pxから40pxに短縮 */
     }
 
-    /* --- スマホ用の調整 --- */
-    @media (max-width: 600px) {
+    /* スマホ用の調整 */
+    @media (max-width: 800px) {
+      #index-list {
+        grid-template-columns: 1fr; /* スマホは1列 */
+        padding: 15px;
+      }
       .month-list { 
-        grid-template-columns: repeat(4, 1fr); /* スマホでは1行に4ヶ月 */
-        gap: 8px;
-      }
-      .year-label {
-        font-size: 1.2rem;
-      }
-      .index-link {
-        height: 40px;
-        font-size: 0.8rem;
+        grid-template-columns: repeat(4, 1fr); /* スマホは4列 */
       }
     }
   </style>
