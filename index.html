@@ -1,63 +1,76 @@
-<script>
-    async function init() {
-      const status = document.getElementById("status");
-      try {
-        const sqlPromise = initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
-        const dataPromise = fetch("database.db").then(res => res.arrayBuffer());
-        const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
-        const db = new SQL.Database(new Uint8Array(buf));
+async function init() {
+  const status = document.getElementById("status");
+  try {
+    const sqlPromise = initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
+    const dataPromise = fetch("database.db").then(res => res.arrayBuffer());
+    const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
+    const db = new SQL.Database(new Uint8Array(buf));
 
-        const res = db.exec("SELECT day, content FROM note ORDER BY day DESC");
-        if (!res.length) return;
-        const rows = res[0].values;
-
-        const indexList = document.getElementById("index-list");
-        const output = document.getElementById("output");
-        let currentMonthStr = "";
-
-        rows.forEach(row => {
-          let rawDate = (row[0] || "").trim();
-          const content = row[1] || "";
-          
-          // 日付の正規化（全角数字を半角に直し、不要な記号を整理）
-          let normalizedDate = rawDate.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-          
-          // 「YYYY. MM」または「YYYY/MM」または「YYYY-MM」などを抽出する強力な正規表現
-          const match = normalizedDate.match(/^(\d{4})[\.\/\-\s年]\s?(\d{1,2})/);
-          
-          let yearMonth = "Other";
-          if (match) {
-            const year = match[1];
-            const month = match[2].padStart(2, '0'); // 1月を01に揃える
-            yearMonth = `${year}. ${month}`;
-          }
-
-          if (yearMonth !== currentMonthStr) {
-            currentMonthStr = yearMonth;
-            const sectionId = "idx-" + yearMonth.replace(/[^0-9]/g, "");
-            
-            const link = document.createElement("a");
-            link.href = "#" + sectionId;
-            link.className = "index-link";
-            link.innerText = yearMonth;
-            indexList.appendChild(link);
-
-            const section = document.createElement("div");
-            section.id = sectionId;
-            section.className = "month-section";
-            section.innerHTML = `<div class="month-title">${yearMonth}</div>`;
-            output.appendChild(section);
-          }
-
-          const card = document.createElement("div");
-          card.className = "note-card";
-          card.innerHTML = `<span class="day-label">${rawDate}</span><div class="note-text">${content}</div>`;
-          output.appendChild(card);
-        });
-        status.innerText = rows.length + " entries";
-      } catch (e) {
-        status.innerText = "Error loading database.";
-      }
+    // 日付を降順で取得
+    const res = db.exec("SELECT day, content FROM note ORDER BY day DESC");
+    if (!res || res.length === 0) {
+      status.innerText = "データが見つかりませんでした。";
+      return;
     }
-    init();
-</script>
+    
+    const rows = res[0].values;
+    const indexList = document.getElementById("index-list");
+    const output = document.getElementById("output");
+    let currentMonthStr = "";
+
+    rows.forEach(row => {
+      // 日付の前後にある余計な空白や改行を除去
+      let rawDate = (row[0] || "").trim();
+      const content = row[1] || "";
+      
+      // 全角数字を半角に変換（念のため）
+      let normalizedDate = rawDate.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      
+      // 正規表現の修正：
+      // 「数字4桁」+「区切り記号1つ(任意)」+「数字1〜2桁」を抽出
+      // スペースがあってもなくても対応できるように \s* を追加
+      const match = normalizedDate.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})/);
+      
+      let yearMonth = "Other";
+      if (match) {
+        const year = match[1];
+        // 1桁の月（例: 5）を 05 に補完して揃える
+        const month = match[2].padStart(2, '0');
+        yearMonth = `${year}. ${month}`;
+      }
+
+      // 月が変わった時の処理
+      if (yearMonth !== currentMonthStr) {
+        currentMonthStr = yearMonth;
+        // IDにドットやスペースが含まれるとリンクが効かないため数字のみにする
+        const sectionId = "idx-" + yearMonth.replace(/[^0-9]/g, "");
+        
+        // サイドバーリンク
+        const link = document.createElement("a");
+        link.href = "#" + sectionId;
+        link.className = "index-link";
+        link.innerText = yearMonth;
+        indexList.appendChild(link);
+
+        // 月別セクション見出し
+        const section = document.createElement("div");
+        section.id = sectionId;
+        section.className = "month-section";
+        section.innerHTML = `<div class="month-title">${yearMonth}</div>`;
+        output.appendChild(section);
+      }
+
+      // カード作成
+      const card = document.createElement("div");
+      card.className = "note-card";
+      card.innerHTML = `<span class="day-label">${rawDate}</span><div class="note-text">${content}</div>`;
+      output.appendChild(card);
+    });
+
+    status.innerText = rows.length + " 件の記録を表示中";
+  } catch (e) {
+    status.innerText = "読み込みエラー: " + e.message;
+    console.error(e);
+  }
+}
+init();
