@@ -9,211 +9,124 @@
   <style>
     :root { 
       --primary: #546e7a; 
-      --bg-color: #f0f2f5;
+      --bg-color: #f4f7f9;
       --card-bg: #ffffff;
       --text-main: #2c3e50;
     }
     
-    /* ヘッダー固定のための余白設定 */
-    html { scroll-padding-top: 140px; }
-    html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
-    body { background-color: var(--bg-color); font-family: sans-serif; color: var(--text-main); padding-top: 80px; }
+    html { scroll-padding-top: 100px; }
+    body { background-color: var(--bg-color); font-family: sans-serif; color: var(--text-main); margin: 0; padding-top: 70px; }
 
-    main { max-width: 800px; margin: auto; padding: 20px; box-sizing: border-box; }
-
-    /* --- 全デバイス共通：上部固定ヘッダー --- */
+    /* --- ミニカレンダー風・固定ドロワーヘッダー --- */
     #sidebar { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: auto; 
-      max-height: 80vh; 
-      background: rgba(255, 255, 255, 0.95); 
-      backdrop-filter: blur(10px); /* 背景をぼかしてお洒落に */
-      border-bottom: 2px solid var(--primary); 
-      z-index: 1000; 
-      padding: 10px 20px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-      overflow-y: auto;
-      transition: all 0.3s ease;
+      position: fixed; top: 0; left: 0; width: 100%; height: auto; 
+      max-height: 95vh; background: rgba(255, 255, 255, 0.98); 
+      backdrop-filter: blur(20px); border-bottom: 2px solid var(--primary); 
+      z-index: 2000; overflow-y: auto; transition: 0.4s ease-in-out;
     }
 
-    /* Index見出し（開閉スイッチ） */
-    #sidebar h4 { 
-      margin: 0; 
-      font-size: 0.85rem; 
-      color: var(--primary); 
-      cursor: pointer; 
-      display: flex;
-      justify-content: center; /* 中央寄せ */
-      align-items: center;
-      letter-spacing: 0.2em;
+    #sidebar-header {
+      height: 70px; display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
-    #sidebar h4::after { content: ' ▼ INDEX'; font-weight: bold; margin-left: 10px; font-size: 0.7rem; }
-    #sidebar.open h4::after { content: ' ▲ CLOSE'; }
+    #sidebar-header h4 { 
+      margin: 0; font-size: 1rem; font-weight: 300; letter-spacing: 0.5em; color: var(--primary);
+    }
+    #sidebar-header h4::after { content: ' ▼ INDEX'; font-size: 0.7rem; margin-left: 10px; }
+    #sidebar.open #sidebar-header h4::after { content: ' ▲ CLOSE'; }
 
-    /* 目次リスト：初期状態は非表示 */
+    /* 目次リスト：グリッド形式 */
     #index-list { 
-      display: none; 
-      margin-top: 20px; 
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      padding-bottom: 20px;
+      display: none; max-width: 1200px; margin: 0 auto; padding: 20px 40px 60px; 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
     }
-    #sidebar.open #index-list { display: block; }
-
-    .year-group { border-top: 1px solid #eee; padding: 15px 0; }
-    .year-label { 
-      font-weight: bold; font-size: 1.1rem; color: var(--primary); 
-      cursor: pointer; margin-bottom: 10px; display: block;
-    }
-
-    /* 月リストを横並びのボタン形式にする */
-    .month-list { display: flex; flex-wrap: wrap; gap: 10px; }
-    .index-link { 
-      border: 1px solid #ddd; border-radius: 6px; padding: 5px 15px; 
-      background: #fff; text-decoration: none; color: #666; font-size: 0.85rem;
-      transition: 0.2s;
-    }
-    .index-link:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    /* --- コンテンツエリア --- */
-    #content-area { width: 100%; }
-    header h1 { font-weight: 300; letter-spacing: 0.1em; color: var(--primary); text-align: center; margin-top: 40px; }
-    
-    .month-title { background: var(--primary); color: white; padding: 6px 20px; border-radius: 20px; display: inline-block; font-size: 0.9rem; margin: 60px 0 20px 0; }
-    .note-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 8px solid #ccc; width: 100%; box-sizing: border-box; }
-    .day-label { font-size: 0.75rem; color: #999; margin-bottom: 15px; display: block; }
-    .note-text { line-height: 1.9; white-space: pre-wrap; font-size: 1.05rem; color: #333; }
-    .hidden { display: none !important; }
-
-    /* 検索窓をヘッダーのすぐ下に配置 */
-    .search-container { margin: 20px auto 40px; text-align: center; max-width: 500px; }
-    #search-input { border-radius: 25px; }
-
-    @media (max-width: 600px) {
-      main { padding: 15px; }
-      .note-card { padding: 20px; }
-      body { padding-top: 60px; }
-    }
-   /* --- INDEXリスト：無駄を削ぎ落とした高密度レイアウト --- */
-    #index-list { 
-      display: none; 
-      max-width: 1200px; /* 幅を広げる */
-      margin: 0 auto; 
-      padding: 20px; /* 上下の無駄な余白をカット */
-      /* PCでは2列に並べる */
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-      gap: 20px;
-    }
-    #sidebar.open #index-list { 
-      display: grid; 
-    }
+    #sidebar.open #index-list { display: grid; }
 
     .year-group { 
-      margin-bottom: 0; 
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 8px;
+      background: #fff; padding: 20px; border-radius: 12px; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;
     }
-
     .year-label { 
-      font-size: 1.2rem; 
-      font-weight: 600; 
-      color: var(--primary); 
-      border-bottom: 1px solid #f0f0f0; 
-      margin-bottom: 15px; 
-      padding-bottom: 5px;
-      display: block;
+      font-weight: bold; font-size: 1.2rem; color: var(--primary); 
+      margin-bottom: 15px; display: block; text-align: center;
+      border-bottom: 2px solid #f0f0f0; padding-bottom: 8px;
     }
 
-    /* 月のタイルをコンパクトに */
+    /* 月をカレンダー風に並べる（4列×3行） */
     .month-list { 
       display: grid; 
-      grid-template-columns: repeat(6, 1fr); /* 常に6列 */
-      gap: 6px; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 8px; 
     }
-
+    
     .index-link { 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 34px; /* 高さを抑える */
-      background: #f9fafb; 
-      border: 1px solid #e5e7eb;
-      text-decoration: none; 
-      color: #4b5563; 
-      font-size: 0.8rem; 
-      border-radius: 4px; 
+      display: flex; align-items: center; justify-content: center;
+      aspect-ratio: 1 / 1; /* 正方形にする */
+      background: #f8f9fa; text-decoration: none; color: #555; 
+      font-size: 0.8rem; border-radius: 6px; border: 1px solid #eef0f2;
+      transition: 0.2s;
     }
+    .index-link:hover { background: var(--primary); color: #fff; transform: scale(1.05); }
 
-    /* メインコンテンツの無駄な余白も調整 */
-    main { 
-      max-width: 1000px; /* 本文の幅も少し広げる */
-      padding: 20px; 
-    }
+    /* --- 検索・メインコンテンツ --- */
+    main { max-width: 800px; margin: 0 auto; padding: 20px; }
+    .search-container { margin: 20px auto 40px; text-align: center; max-width: 500px; }
+    #search-input { border-radius: 30px; border: 1px solid #ddd; }
 
-    .month-title { 
-      margin: 40px 0 20px; /* 上の余白を80pxから40pxに短縮 */
-    }
+    .month-title { background: var(--primary); color: white; padding: 8px 24px; border-radius: 30px; display: inline-block; font-size: 0.9rem; margin: 60px 0 20px 0; }
+    .note-card { background: white; padding: 35px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 40px; border-left: 8px solid #ccc; width: 100%; box-sizing: border-box; }
+    .day-label { font-size: 0.8rem; color: #999; margin-bottom: 15px; display: block; }
+    .note-text { line-height: 2.0; white-space: pre-wrap; font-size: 1.05rem; color: #333; }
+    
+    .hidden { display: none !important; }
 
-    /* スマホ用の調整 */
     @media (max-width: 800px) {
-      #index-list {
-        grid-template-columns: 1fr; /* スマホは1列 */
-        padding: 15px;
-      }
-      .month-list { 
-        grid-template-columns: repeat(4, 1fr); /* スマホは4列 */
-      }
+      #index-list { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); padding: 20px; }
+      .month-list { grid-template-columns: repeat(4, 1fr); }
     }
   </style>
 </head>
 <body>
 
   <nav id="sidebar">
-    <h4 id="index-toggle">WORDS ARCHIVE</h4>
+    <div id="sidebar-header" onclick="toggleSidebar()">
+      <h4>WORDS ARCHIVE</h4>
+    </div>
     <div id="index-list"></div>
   </nav>
 
   <main>
-    <header>
-      <h1>Words Archive</h1>
-      <p id="status" style="text-align:center; font-size:0.8rem; color:#999;">Initializing...</p>
-    </header>
-
     <div class="search-container">
-      <input type="text" id="search-input" placeholder="アーカイブ内を検索...">
+      <input type="text" id="search-input" placeholder="アーカイブ内を検索..." oninput="filterNotes()">
     </div>
-
     <section id="content-area">
       <div id="output"></div>
     </section>
   </main>
 
   <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    let searchTimer;
     function filterNotes() {
-      const q = document.getElementById('search-input').value.toLowerCase();
-      document.querySelectorAll('.note-card').forEach(c => c.classList.toggle('hidden', !c.innerText.toLowerCase().includes(q)));
-      document.querySelectorAll('.month-title').forEach(t => {
-        let n = t.nextElementSibling, v = false;
-        while (n && n.classList.contains('note-card')) { if (!n.classList.contains('hidden')) { v = true; break; } n = n.nextElementSibling; }
-        t.classList.toggle('hidden', !v);
-      });
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        document.querySelectorAll('.note-card').forEach(c => c.classList.toggle('hidden', !c.innerText.toLowerCase().includes(q)));
+        document.querySelectorAll('.month-title').forEach(t => {
+          let n = t.nextElementSibling, v = false;
+          while (n && n.classList.contains('note-card')) { if (!n.classList.contains('hidden')) { v = true; break; } n = n.nextElementSibling; }
+          t.classList.toggle('hidden', !v);
+        });
+      }, 300);
     }
 
     async function init() {
       const indexList = document.getElementById("index-list");
       const output = document.getElementById("output");
       const sidebar = document.getElementById("sidebar");
-
-      // ヘッダー開閉イベント
-      document.getElementById('index-toggle').onclick = () => sidebar.classList.toggle('open');
-      document.getElementById('search-input').oninput = filterNotes;
 
       try {
         const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` });
@@ -229,17 +142,15 @@
           let rawD = (row[0] || "").trim(), txt = row[1] || "", clr = row[2] || "#cccccc";
           let norm = rawD.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/\s+/g, " ");
           const match = norm.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})/);
-          let y = match ? match[1] : "Other", m = match ? match[2].padStart(2, '0') : "", ym = match ? `${y}. ${m}` : "Other";
+          let y = match ? match[1] : "Other", m = match ? match[2].padStart(1, '0') : "", ym = match ? `${y}. ${m}` : "Other";
 
           if (y !== currentYear) {
             currentYear = y;
             const yearGroup = document.createElement("div");
             yearGroup.className = "year-group";
             yearGroup.innerHTML = `<span class="year-label">${y}</span>`;
-            
             activeMonthList = document.createElement("div");
             activeMonthList.className = "month-list";
-            
             yearGroup.appendChild(activeMonthList);
             indexList.appendChild(yearGroup);
           }
@@ -249,7 +160,7 @@
             const sid = "idx-" + ym.replace(/[^0-9]/g, "");
             const link = document.createElement("a");
             link.href = "#" + sid; link.className = "index-link"; link.innerText = match ? `${m}月` : "Other";
-            link.onclick = () => sidebar.classList.remove('open'); // クリックしたら閉じる
+            link.onclick = () => sidebar.classList.remove('open');
             activeMonthList.appendChild(link);
 
             const sec = document.createElement("div");
@@ -262,7 +173,6 @@
           card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
           output.appendChild(card);
         });
-        document.getElementById("status").innerText = `${rows.length} entries.`;
       } catch (e) { console.error(e); }
     }
     window.onload = init;
