@@ -136,18 +136,21 @@
     const toggleBtn = document.getElementById('sidebar-toggle');
     const backToTop = document.getElementById('back-to-top');
 
-    // 【修正箇所：JS】どこでも良いので貼り付け
     function updateCount() {
+      const allCards = document.querySelectorAll('.note-card');
       const visibleCards = document.querySelectorAll('.note-card:not(.hidden)').length;
-      const totalCards = document.querySelectorAll('.note-card').length;
+      const totalCards = allCards.length;
       const countElement = document.getElementById('record-count');
+      
+      if (!countElement || totalCards === 0) return;
+
       if (visibleCards === totalCards) {
         countElement.innerText = `${totalCards.toLocaleString()} records`;
       } else {
         countElement.innerText = `${visibleCards.toLocaleString()} / ${totalCards.toLocaleString()} records found`;
       }
     }
-    // 開閉を制御
+
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
       document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -160,7 +163,6 @@
 
     toggleBtn.onclick = toggleMenu;
 
-    // トップに戻るボタンの表示制御
     window.onscroll = function() {
       if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
         backToTop.classList.add('visible');
@@ -169,7 +171,6 @@
       }
     };
 
-    // ボタンクリックでトップへ
     backToTop.onclick = function() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -185,23 +186,23 @@
         if (q === "") {
           cards.forEach(c => c.classList.remove('hidden'));
           titles.forEach(t => t.classList.remove('hidden'));
-          return;
+        } else {
+          cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.classList.toggle('hidden', !text.includes(q));
+          });
+
+          titles.forEach(title => {
+            let next = title.nextElementSibling;
+            let hasVisible = false;
+            while (next && next.classList.contains('note-card')) {
+              if (!next.classList.contains('hidden')) { hasVisible = true; break; }
+              next = next.nextElementSibling;
+            }
+            title.classList.toggle('hidden', !hasVisible);
+          });
         }
-
-        cards.forEach(card => {
-          const text = card.innerText.toLowerCase();
-          card.classList.toggle('hidden', !text.includes(q));
-        });
-
-        titles.forEach(title => {
-          let next = title.nextElementSibling;
-          let hasVisible = false;
-          while (next && next.classList.contains('note-card')) {
-            if (!next.classList.contains('hidden')) { hasVisible = true; break; }
-            next = next.nextElementSibling;
-          }
-          title.classList.toggle('hidden', !hasVisible);
-        });
+        updateCount(); // ★検索後に件数を更新
       }, 600); 
     }
 
@@ -251,7 +252,6 @@
                 }, 50); 
               }
             };
-            
             activeMonthList.appendChild(link);
 
             const sec = document.createElement("div");
@@ -264,6 +264,10 @@
           card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
           output.appendChild(card);
         });
+
+        // ★読み込み完了後に件数を更新（描画を待つため少し遅らせる）
+        setTimeout(updateCount, 200);
+
       } catch (e) { console.error(e); }
     }
     window.onload = init;
