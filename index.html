@@ -107,6 +107,7 @@
       .index-link { font-size: 0.9rem; }
       #back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; }
     }
+    
   </style>
 </head>
 <body>
@@ -121,8 +122,11 @@
   </nav>
 
   <main>
-    <div class="search-box"><input type="text" id="search-input" placeholder="Search archive..."></div>
-    <section id="content-area"><div id="output"></div></section>
+    <div class="search-box">
+    <input type="text" id="search-input" placeholder="Search in Cahier...">
+    <div id="record-count" style="font-size: 0.8rem; color: #999; margin-top: 10px; font-family: sans-serif; letter-spacing: 0.1em;">0 records</div>
+  </div>
+  <section id="content-area"><div id="output"></div></section>
   </main>
 
   <div id="back-to-top"></div>
@@ -132,6 +136,17 @@
     const toggleBtn = document.getElementById('sidebar-toggle');
     const backToTop = document.getElementById('back-to-top');
 
+    // 【修正箇所：JS】どこでも良いので貼り付け
+    function updateCount() {
+      const visibleCards = document.querySelectorAll('.note-card:not(.hidden)').length;
+      const totalCards = document.querySelectorAll('.note-card').length;
+      const countElement = document.getElementById('record-count');
+      if (visibleCards === totalCards) {
+        countElement.innerText = `${totalCards.toLocaleString()} records`;
+      } else {
+        countElement.innerText = `${visibleCards.toLocaleString()} / ${totalCards.toLocaleString()} records found`;
+      }
+    }
     // 開閉を制御
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
