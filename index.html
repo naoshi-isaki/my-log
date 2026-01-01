@@ -67,10 +67,44 @@
     
     .hidden { display: none !important; }
 
+    /* --- トップに戻るボタン --- */
+    #back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    #back-to-top.visible {
+      opacity: 0.8;
+      visibility: visible;
+    }
+    #back-to-top:hover {
+      opacity: 1;
+      transform: translateY(-5px);
+    }
+    #back-to-top::before {
+      content: '▲';
+      font-size: 1.2rem;
+    }
+
     @media (max-width: 600px) { 
-      #index-list { grid-template-columns: repeat(2, 1fr) !important; gap: 15px; } /* スマホでも横に2つ並べる */
+      #index-list { grid-template-columns: repeat(2, 1fr) !important; gap: 15px; }
       #index-container { padding: 0 20px; margin-top: 80px; }
-      .index-link { font-size: 0.9rem; } /* スマホは少し大きく */
+      .index-link { font-size: 0.9rem; }
+      #back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; }
     }
   </style>
 </head>
@@ -90,13 +124,16 @@
     <section id="content-area"><div id="output"></div></section>
   </main>
 
+  <div id="back-to-top"></div>
+
   <script>
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
+    const backToTop = document.getElementById('back-to-top');
 
+    // 開閉を制御
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
-      // メニューが開いている時は背面スクロールを禁止
       document.body.style.overflow = isOpen ? 'hidden' : '';
     }
 
@@ -106,6 +143,20 @@
     }
 
     toggleBtn.onclick = toggleMenu;
+
+    // トップに戻るボタンの表示制御
+    window.onscroll = function() {
+      if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    };
+
+    // ボタンクリックでトップへ
+    backToTop.onclick = function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     let searchTimer;
     function filterNotes() {
@@ -174,13 +225,11 @@
             const link = document.createElement("a");
             link.href = "#" + sid; link.className = "index-link"; link.innerText = match ? m : "??";
             
-            // 【スマホ対策】タップ時の挙動を修正
             link.onclick = (e) => {
-              e.preventDefault(); // 一旦デフォルトのジャンプを止める
+              e.preventDefault();
               const target = document.getElementById(sid);
               if (target) {
-                closeMenu(); // まずメニューを閉じる
-                // メニューが閉じるアニメーション（0.4s）を待たずにジャンプを実行
+                closeMenu();
                 setTimeout(() => {
                   target.scrollIntoView({ behavior: 'smooth' });
                 }, 50); 
