@@ -1,1 +1,1 @@
-Error in call to API function "files/download": Your app (ID: 5785619) is not permitted to access this endpoint because it does not have the required scope 'files.content.read'. The owner of the app can enable the scope for the app using the Permissions tab on the App Console.
+{"error_summary": "missing_scope/..", "error": {".tag": "missing_scope", "required_scope": "files.content.read"}}
