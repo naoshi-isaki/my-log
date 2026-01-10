@@ -214,7 +214,7 @@
 
       try {
         const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` });
-        const res_db = await fetch("database.db"?v=" + new Date().getTime());
+        const res_db = await fetch("database.db");
         const db = new SQL.Database(new Uint8Array(await res_db.arrayBuffer()));
         const rows = db.exec("SELECT day, content, marker_color FROM note ORDER BY day DESC")[0].values;
 
