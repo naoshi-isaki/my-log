@@ -23,7 +23,7 @@ jobs:
       - name: Download file from Dropbox
         run: |
           curl -X POST https://content.dropboxapi.com/2/files/download \
-            --header "Authorization: Bearer ${{sl.u.AGPtSDLN8jCCScx6aIxggY1QGBnOmH0vqx96SMLDct_f4h8lu-_ey0-aysEBWb8vl110VB5dxI7jOE474Ry-NqqWjcHu8qlgnQCOzskj5kLfTQi_CiV63oXJsXWhmiutRRMffG0Qvr9tDcFCvmWgqFXgYh9G8ISnYyhSwzz2yo_FEPCPLIdpAfoUsdwpepavnCX1kPaAROuj4-tS4e2Eu2Agu8_mvEPJxCSe8VMMpyuflDtmCjrF_IBg4ol87bRzbhvG9Z4FydIPKB-6ifTQLpAibHwB0SBTtoECqh6ymna3QlV0ipnU16oEraqQoSvz3-ZWMa65z-mhNnAJaDVUJbeu1Bt17YfnlNALBHaGpFsO9msamqp7eBjAMtcqlyn3BMHNBTyiQK0fW2_1wiW-GWWHfLl2vR_aVgbcVv-apNimAn2-psastlIcboMtdyJTcVFAR3DJr671v6Cu9VF0uyL9-O1LzmE62MGkRRs0WhwQwI-h5A1wLV4cLk8DNkY7jzxO05GrfEzpij2T--HkDhvVJYEL0IaTcFfX2yT19Q5HvArdmZK20jCiF4lhEnEKL30eladVtT4xuGSMFiz-G9GEFDLCgc43NI8E51MKrQoGJvtgW-xfIt6aqWjdmlJK18b1TKNcabKSC2t49WYSCJ4kYT8NZEHZasuG3Jk4SjCk2kB_Y8rfBnS1DTi7Q2RkysKKRbscPlvUsWaC6kPV-vo99O4K65EdH1gCpzn3_RaRNVKvoi8zBHTVhjzABj562J8wD9P0ZcORI5lSIQ_7YFecwvWEeU9BmS-S-UPphQndFwnyZH07UobWBiLLWVoVfmoAWhqwGWDmTRsmRF8xKaU-QbzJ4KO-TV3gykrKgTFLrGEp-r1C-w4j1zRCoEYsPZF7WjnWdF4G_kAoxSlYchTsUNXSoZxvO0oT6N54Ko6B-qYicCG-7xkP6uDqJGnyUtmqi70EX7ovUgJCBt69ZPu-MKL4QhQymIK66bBLyFgPEunbOBFVDkeHblOuyXe-6f-sB3DDBNwJ9OmF8-hcvr2vea19HAMssN0p-uzONjMkz3CNKDZK0yGDeBhjAzd4XGQKLBv5Cyp9cTB66W1bThuMewOnI8qF7aHl5Lv80MJA3uWYGJE8VCN5EbHLRO6z_Y-aBn7d-ldOz1Tz8A3lyat93b4H0MkA1jKuSshwIxmCHWf_skFrSNHUSgHmm7oOjCDgVMhXwpfIYfSzj3X9YLhBVVrztKAVafrYx3Cq4_SvpjTJxX4xpvbOg9dKvoBXhHJNKEkJg2tNbheOxDM6A6Sv}}" \
+            --header "Authorization: Bearer ${{secrets.DROPBOX_ACCESS_TOKEN}}" \
             --header "Dropbox-API-Arg: {\"path\": \"/database.db\"}" \
             -o "database.db"
           # ※ \"path\": \"/test.txt\" の部分はDropbox上の実際のパスに書き換えてください。
