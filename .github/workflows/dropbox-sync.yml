@@ -3,7 +3,7 @@ name: Dropbox to GitHub Sync
 # 実行タイミングの設定
 on:
   schedule:
-    - cron: '0 * * * *' # 1時間に1回自動実行
+    - cron: '0 15 * * 0' # 日本時間の日曜日 00:00（UTCの土曜日 15:00）
   workflow_dispatch:     # GitHub上で「Run workflow」ボタンを手動で押せるようにする
 
 jobs:
