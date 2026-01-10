@@ -1,1 +1,1 @@
-{"error_summary": "missing_scope/..", "error": {".tag": "missing_scope", "required_scope": "files.content.read"}}
+{"error_summary": "path/not_found/", "error": {".tag": "path", "path": {".tag": "not_found"}}}
