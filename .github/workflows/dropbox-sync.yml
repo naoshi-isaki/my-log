@@ -24,7 +24,7 @@ jobs:
         run: |
           curl -X POST https://content.dropboxapi.com/2/files/download \
             --header "Authorization: Bearer ${{secrets.DROPBOX_ACCESS_TOKEN}}" \
-            --header "Dropbox-API-Arg: {\"path\": \"/database.db\"}" \
+            --header "Dropbox-API-Arg: {\"path\": \"/アプリ/DAILY NOTE/database.db\"}" \
             -o "database.db"
           # ※ \"path\": \"/test.txt\" の部分はDropbox上の実際のパスに書き換えてください。
           # ※ -o "test.txt" は保存するファイル名です。
