@@ -4,7 +4,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cahier (2016–2026) - nisaki </title>
+  <title>Cahier (2016–2026) - nisaki</title>
   <link rel="icon" href="favicon.jpg" type="image/jpeg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
@@ -12,22 +12,13 @@
     :root { 
       --primary: #455a64; 
       --bg-color: #f8fafb;
-      --card-bg: #ffffff;
+      --accent: #d1d9e0;
     }
     
-    /* ジャンプ位置の微調整（ヘッダーに重ならないように） */
     html { scroll-padding-top: 80px; scroll-behavior: smooth; }
     body { background-color: var(--bg-color); font-family: -apple-system, sans-serif; margin: 0; padding-top: 65px; }
 
-    /* --- フル画面・目次オーバーレイ --- */
-    #sidebar { 
-      position: fixed; top: 0; left: 0; width: 100%; height: 0; 
-      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
-      z-index: 2000; overflow: hidden; transition: height 0.4s ease-in-out;
-    }
-    #sidebar.open { height: 100vh; overflow-y: auto; }
-
-    /* 固定ヘッダー（中央スイッチ） */
+    /* --- ヘッダー・ナビゲーション --- */
     #sidebar-toggle {
       position: fixed; top: 0; left: 0; width: 100%; height: 65px;
       display: flex; align-items: center; justify-content: center;
@@ -35,240 +26,183 @@
       border-bottom: 1px solid #eee;
     }
     #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; }
-    #sidebar-toggle h4::after { content: 'INDEX'; font-size: 0.6rem; margin-left: 12px; border: 1px solid var(--primary); padding: 1px 6px; border-radius: 3px; }
-    #sidebar.open #sidebar-toggle h4::after { content: 'CLOSE'; background: var(--primary); color: #fff; }
 
-    /* 目次の中身：横並びグリッド */
-    #index-container { max-width: 1400px; margin: 100px auto 60px; padding: 0 40px; }
-    #index-list { 
-      display: grid !important; 
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-      gap: 30px; width: 100%;
+    /* ランダムボタンのスタイル */
+    #random-btn {
+      position: fixed; top: 15px; right: 20px; z-index: 2200;
+      background: none; border: 1px solid var(--accent); color: var(--primary);
+      border-radius: 20px; padding: 5px 15px; font-size: 0.7rem; cursor: pointer;
+      transition: 0.3s;
     }
+    #random-btn:hover { background: var(--primary); color: #fff; }
 
-    .year-group { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; height: fit-content; }
-    .year-label { font-weight: bold; font-size: 1.3rem; color: var(--primary); margin-bottom: 15px; display: block; border-bottom: 2px solid #f5f5f5; padding-bottom: 8px; text-align: center; }
-
-    .month-list { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px; }
-    .index-link { 
-      display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1;
-      background: #fcfdfe; text-decoration: none; color: #666; font-size: 0.8rem; 
-      border-radius: 6px; border: 1px solid #eee; transition: 0.2s;
+    /* --- カレンダーサイドバー --- */
+    #sidebar { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 0; 
+      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
+      z-index: 2000; overflow: hidden; transition: height 0.4s ease-in-out;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .index-link:hover { background: var(--primary); color: #fff; }
+    #sidebar.open { height: 100vh; }
+
+    .calendar-picker {
+      background: #fff; padding: 30px; border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px;
+    }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .cal-header button { background: none; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; width: auto; margin:0; }
+    #current-month-display { font-weight: bold; font-size: 1.1rem; color: var(--primary); }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+    .dow { font-size: 0.7rem; color: #999; font-weight: bold; margin-bottom: 10px; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border-radius: 8px; color: #eee; }
+    .cal-day.has-note { background: #f0f4f8; color: var(--primary); font-weight: bold; cursor: pointer; border: 1px solid var(--accent); }
+    .cal-day.has-note:hover { background: var(--primary); color: #fff; }
 
     /* --- メインコンテンツ --- */
     main { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
     .search-box { margin-bottom: 50px; text-align: center; }
     #search-input { max-width: 400px; border-radius: 30px; border: 1px solid #ddd; text-align: center; }
-
     .month-title { border-bottom: 1px solid #ddd; color: var(--primary); padding-bottom: 10px; font-size: 1.2rem; margin: 100px 0 40px; text-align: center; font-weight: 300; }
     .note-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 40px; border-left: 5px solid #eee; }
     .day-label { font-size: 0.8rem; color: #aaa; margin-bottom: 15px; display: block; }
     .note-text { line-height: 2.0; white-space: pre-wrap; font-size: 1.05rem; }
-    
     .hidden { display: none !important; }
-
-    /* --- トップに戻るボタン --- */
-    #back-to-top {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 50px;
-      height: 50px;
-      background: var(--primary);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 1500;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    #back-to-top.visible {
-      opacity: 0.8;
-      visibility: visible;
-    }
-    #back-to-top:hover {
-      opacity: 1;
-      transform: translateY(-5px);
-    }
-    #back-to-top::before {
-      content: '▲';
-      font-size: 1.2rem;
-    }
-
-    @media (max-width: 600px) { 
-      #index-list { grid-template-columns: repeat(2, 1fr) !important; gap: 15px; }
-      #index-container { padding: 0 20px; margin-top: 80px; }
-      .index-link { font-size: 0.9rem; }
-      #back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; }
-    }
-    
   </style>
 </head>
 <body>
 
   <div id="sidebar-toggle"><h4>Cahier</h4></div>
+  <button id="random-btn">RANDOM</button>
 
   <nav id="sidebar">
-    <div id="index-container">
-      <h2 style="font-weight:200; letter-spacing:0.3em; color:var(--primary); text-align:center; margin-bottom:40px;">TIME INDEX</h2>
-      <div id="index-list"></div>
+    <div class="calendar-picker">
+      <div class="cal-header">
+        <button id="prev-month">＜</button>
+        <div id="current-month-display"></div>
+        <button id="next-month">＞</button>
+      </div>
+      <div class="cal-grid" id="calendar-days">
+        <div class="dow">S</div><div class="dow">M</div><div class="dow">T</div><div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
+      </div>
     </div>
   </nav>
 
   <main>
     <div class="search-box">
-    <input type="text" id="search-input" placeholder="Search in Cahier...">
-    <div id="record-count" style="font-size: 0.8rem; color: #999; margin-top: 10px; font-family: sans-serif; letter-spacing: 0.1em;">0 records</div>
-  </div>
-  <section id="content-area"><div id="output"></div></section>
+      <input type="text" id="search-input" placeholder="Search...">
+      <div id="record-count" style="font-size: 0.8rem; color: #999; margin-top: 10px;">0 records</div>
+    </div>
+    <div id="output"></div>
   </main>
 
-  <div id="back-to-top"></div>
-
   <script>
+    let allDateIds = []; // ランダム抽出用のIDリスト
+    let noteDates = new Set();
+    let displayDate = new Date();
+
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
-    const backToTop = document.getElementById('back-to-top');
 
-    function updateCount() {
-      const allCards = document.querySelectorAll('.note-card');
-      const visibleCards = document.querySelectorAll('.note-card:not(.hidden)').length;
-      const totalCards = allCards.length;
-      const countElement = document.getElementById('record-count');
-      
-      if (!countElement || totalCards === 0) return;
-
-      if (visibleCards === totalCards) {
-        countElement.innerText = `${totalCards.toLocaleString()} records`;
-      } else {
-        countElement.innerText = `${visibleCards.toLocaleString()} / ${totalCards.toLocaleString()} records found`;
-      }
-    }
-
+    // メニュー開閉
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
       document.body.style.overflow = isOpen ? 'hidden' : '';
+      if(isOpen) renderCalendar();
     }
-
-    function closeMenu() {
-      sidebar.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
     toggleBtn.onclick = toggleMenu;
 
-    window.onscroll = function() {
-      if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        backToTop.classList.add('visible');
-      } else {
-        backToTop.classList.remove('visible');
+    // ランダムジャンプ機能
+    document.getElementById('random-btn').onclick = () => {
+      if (allDateIds.length === 0) return;
+      const randomId = allDateIds[Math.floor(Math.random() * allDateIds.length)];
+      const target = document.getElementById(randomId);
+      if (target) {
+        if (sidebar.classList.contains('open')) toggleMenu(); // カレンダーが開いてたら閉じる
+        target.scrollIntoView({ behavior: 'smooth' });
+        // 一時的にハイライト
+        target.style.backgroundColor = "#fffde7";
+        setTimeout(() => { target.style.backgroundColor = "#fff"; }, 2000);
       }
     };
 
-    backToTop.onclick = function() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-days');
+      const display = document.getElementById('current-month-display');
+      grid.querySelectorAll('.cal-day').forEach(d => d.remove());
 
-    let searchTimer;
-    function filterNotes() {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        const q = document.getElementById('search-input').value.toLowerCase().trim();
-        const cards = document.querySelectorAll('.note-card');
-        const titles = document.querySelectorAll('.month-title');
+      const year = displayDate.getFullYear();
+      const month = displayDate.getMonth();
+      display.innerText = `${year}.${String(month + 1).padStart(2, '0')}`;
 
-        if (q === "") {
-          cards.forEach(c => c.classList.remove('hidden'));
-          titles.forEach(t => t.classList.remove('hidden'));
-        } else {
-          cards.forEach(card => {
-            const text = card.innerText.toLowerCase();
-            card.classList.toggle('hidden', !text.includes(q));
-          });
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
 
-          titles.forEach(title => {
-            let next = title.nextElementSibling;
-            let hasVisible = false;
-            while (next && next.classList.contains('note-card')) {
-              if (!next.classList.contains('hidden')) { hasVisible = true; break; }
-              next = next.nextElementSibling;
-            }
-            title.classList.toggle('hidden', !hasVisible);
-          });
+      for (let i = 0; i < firstDay; i++) {
+        const spacer = document.createElement('div');
+        spacer.className = 'cal-day';
+        grid.appendChild(spacer);
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'cal-day';
+        dayEl.innerText = d;
+        const dateKey = `${year}-${month + 1}-${d}`;
+        if (noteDates.has(dateKey)) {
+          dayEl.classList.add('has-note');
+          dayEl.onclick = () => {
+            const targetId = `date-${year}-${month + 1}-${d}`;
+            toggleMenu();
+            setTimeout(() => document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' }), 100);
+          };
         }
-        updateCount(); // ★検索後に件数を更新
-      }, 600); 
+        grid.appendChild(dayEl);
+      }
     }
 
-    async function init() {
-      const indexList = document.getElementById("index-list");
-      const output = document.getElementById("output");
-      document.getElementById('search-input').oninput = filterNotes;
+    document.getElementById('prev-month').onclick = () => { displayDate.setMonth(displayDate.getMonth() - 1); renderCalendar(); };
+    document.getElementById('next-month').onclick = () => { displayDate.setMonth(displayDate.getMonth() + 1); renderCalendar(); };
 
+    async function init() {
       try {
         const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` });
-        const res_db = await fetch("database.db");
-        const db = new SQL.Database(new Uint8Array(await res_db.arrayBuffer()));
+        const res = await fetch("database.db?v=" + new Date().getTime());
+        const db = new SQL.Database(new Uint8Array(await res.arrayBuffer()));
         const rows = db.exec("SELECT day, content, marker_color FROM note ORDER BY day DESC")[0].values;
 
-        let currentYear = "", currentYM = "", activeMonthList = null;
+        const output = document.getElementById("output");
+        let currentYM = "";
 
         rows.forEach(row => {
-          let rawD = (row[0] || "").trim(), txt = row[1] || "", clr = row[2] || "#cccccc";
-          let norm = rawD.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/\s+/g, " ");
-          const match = norm.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})/);
-          let y = match ? match[1] : "Other", m = match ? match[2] : "", ym = match ? `${y}. ${m}` : "Other";
-
-          if (y !== currentYear) {
-            currentYear = y;
-            const yearGroup = document.createElement("div");
-            yearGroup.className = "year-group";
-            yearGroup.innerHTML = `<span class="year-label">${y}</span>`;
-            activeMonthList = document.createElement("div");
-            activeMonthList.className = "month-list";
-            yearGroup.appendChild(activeMonthList);
-            indexList.appendChild(yearGroup);
-          }
-
-          if (ym !== currentYM) {
-            currentYM = ym;
-            const sid = "idx-" + ym.replace(/[^0-9]/g, "");
-            const link = document.createElement("a");
-            link.href = "#" + sid; link.className = "index-link"; link.innerText = match ? m : "??";
+          let rawD = row[0].trim(), txt = row[1], clr = row[2] || "#eee";
+          let norm = rawD.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+          const m = norm.match(/^(\d{4})[\.\/\-\s年]*\s?(\d{1,2})[\.\/\-\s月]*\s?(\d{1,2})?/);
+          
+          if (m) {
+            const y = m[1], mo = parseInt(m[2]), d = m[3] ? parseInt(m[3]) : null;
+            const dateStr = `${y}-${mo}-${d}`;
+            const dateId = `date-${y}-${mo}-${d}`;
             
-            link.onclick = (e) => {
-              e.preventDefault();
-              const target = document.getElementById(sid);
-              if (target) {
-                closeMenu();
-                setTimeout(() => {
-                  target.scrollIntoView({ behavior: 'smooth' });
-                }, 50); 
-              }
-            };
-            activeMonthList.appendChild(link);
+            noteDates.add(dateStr);
+            allDateIds.push(dateId); // ランダム候補に追加
+            
+            const ym = `${y}.${mo}`;
+            if (ym !== currentYM) {
+              currentYM = ym;
+              const title = document.createElement("div");
+              title.className = "month-title"; title.innerText = ym;
+              output.appendChild(title);
+            }
 
-            const sec = document.createElement("div");
-            sec.id = sid; sec.className = "month-title"; sec.innerText = ym;
-            output.appendChild(sec);
+            const card = document.createElement("div");
+            card.id = dateId;
+            card.className = "note-card"; card.style.borderLeftColor = clr;
+            card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
+            output.appendChild(card);
           }
-
-          const card = document.createElement("div");
-          card.className = "note-card"; card.style.borderLeftColor = clr;
-          card.innerHTML = `<span class="day-label">${rawD}</span><div class="note-text">${txt}</div>`;
-          output.appendChild(card);
         });
-
-        // ★読み込み完了後に件数を更新（描画を待つため少し遅らせる）
-        setTimeout(updateCount, 200);
-
+        document.getElementById('record-count').innerText = `${rows.length} records`;
       } catch (e) { console.error(e); }
     }
     window.onload = init;
