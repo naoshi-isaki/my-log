@@ -19,20 +19,21 @@
     body { background-color: var(--bg-color); font-family: -apple-system, sans-serif; margin: 0; padding-top: 65px; }
 
     /* --- ヘッダー・ナビゲーション --- */
-    #sidebar-toggle {
+    #header-bar {
       position: fixed; top: 0; left: 0; width: 100%; height: 65px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255, 255, 255, 0.9); z-index: 2100; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; /* 両端に配置 */
+      padding: 0 20px;
+      background: rgba(255, 255, 255, 0.9); z-index: 2100;
       border-bottom: 1px solid #eee;
     }
-    #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; }
+    
+    #sidebar-toggle { cursor: pointer; flex-grow: 1; text-align: center; }
+    #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; margin-left: 60px; /* RANDOMボタンとのバランス */ }
 
-    /* ランダムボタンのスタイル */
     #random-btn {
-      position: fixed; top: 15px; right: 20px; z-index: 2200;
       background: none; border: 1px solid var(--accent); color: var(--primary);
-      border-radius: 20px; padding: 5px 15px; font-size: 0.7rem; cursor: pointer;
-      transition: 0.3s;
+      border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; cursor: pointer;
+      transition: 0.3s; white-space: nowrap;
     }
     #random-btn:hover { background: var(--primary); color: #fff; }
 
@@ -47,11 +48,15 @@
 
     .calendar-picker {
       background: #fff; padding: 30px; border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 95%; max-width: 400px;
     }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .cal-header button { background: none; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; width: auto; margin:0; }
-    #current-month-display { font-weight: bold; font-size: 1.1rem; color: var(--primary); }
+    
+    /* 年月選択ドロップダウンのスタイル */
+    .cal-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 25px; }
+    .cal-header select { 
+      width: auto; margin-bottom: 0; padding: 5px 30px 5px 10px; 
+      font-size: 0.9rem; border-color: #eee; background-color: #fcfdfe;
+    }
 
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
     .dow { font-size: 0.7rem; color: #999; font-weight: bold; margin-bottom: 10px; }
@@ -72,15 +77,21 @@
 </head>
 <body>
 
-  <div id="sidebar-toggle"><h4>Cahier</h4></div>
-  <button id="random-btn">RANDOM</button>
+  <div id="header-bar">
+    <div style="width: 80px;"></div> <div id="sidebar-toggle"><h4>Cahier</h4></div>
+    <button id="random-btn">RANDOM</button>
+  </div>
 
   <nav id="sidebar">
     <div class="calendar-picker">
       <div class="cal-header">
-        <button id="prev-month">＜</button>
-        <div id="current-month-display"></div>
-        <button id="next-month">＞</button>
+        <select id="year-select"></select>
+        <select id="month-select">
+          <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
+          <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
+          <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
+          <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
+        </select>
       </div>
       <div class="cal-grid" id="calendar-days">
         <div class="dow">S</div><div class="dow">M</div><div class="dow">T</div><div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
@@ -97,30 +108,40 @@
   </main>
 
   <script>
-    let allDateIds = []; // ランダム抽出用のIDリスト
+    let allDateIds = [];
     let noteDates = new Set();
     let displayDate = new Date();
 
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
+    const yearSelect = document.getElementById('year-select');
+    const monthSelect = document.getElementById('month-select');
 
-    // メニュー開閉
+    // 年の選択肢を生成 (2016-2026)
+    for (let y = 2016; y <= 2026; y++) {
+      let opt = document.createElement('option');
+      opt.value = y; opt.innerText = y + "年";
+      yearSelect.appendChild(opt);
+    }
+
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
       document.body.style.overflow = isOpen ? 'hidden' : '';
-      if(isOpen) renderCalendar();
+      if(isOpen) {
+        yearSelect.value = displayDate.getFullYear();
+        monthSelect.value = displayDate.getMonth();
+        renderCalendar();
+      }
     }
     toggleBtn.onclick = toggleMenu;
 
-    // ランダムジャンプ機能
     document.getElementById('random-btn').onclick = () => {
       if (allDateIds.length === 0) return;
       const randomId = allDateIds[Math.floor(Math.random() * allDateIds.length)];
       const target = document.getElementById(randomId);
       if (target) {
-        if (sidebar.classList.contains('open')) toggleMenu(); // カレンダーが開いてたら閉じる
+        if (sidebar.classList.contains('open')) toggleMenu();
         target.scrollIntoView({ behavior: 'smooth' });
-        // 一時的にハイライト
         target.style.backgroundColor = "#fffde7";
         setTimeout(() => { target.style.backgroundColor = "#fff"; }, 2000);
       }
@@ -128,12 +149,11 @@
 
     function renderCalendar() {
       const grid = document.getElementById('calendar-days');
-      const display = document.getElementById('current-month-display');
       grid.querySelectorAll('.cal-day').forEach(d => d.remove());
 
-      const year = displayDate.getFullYear();
-      const month = displayDate.getMonth();
-      display.innerText = `${year}.${String(month + 1).padStart(2, '0')}`;
+      const year = parseInt(yearSelect.value);
+      const month = parseInt(monthSelect.value);
+      displayDate = new Date(year, month, 1);
 
       const firstDay = new Date(year, month, 1).getDay();
       const lastDate = new Date(year, month + 1, 0).getDate();
@@ -161,8 +181,8 @@
       }
     }
 
-    document.getElementById('prev-month').onclick = () => { displayDate.setMonth(displayDate.getMonth() - 1); renderCalendar(); };
-    document.getElementById('next-month').onclick = () => { displayDate.setMonth(displayDate.getMonth() + 1); renderCalendar(); };
+    yearSelect.onchange = renderCalendar;
+    monthSelect.onchange = renderCalendar;
 
     async function init() {
       try {
@@ -185,7 +205,7 @@
             const dateId = `date-${y}-${mo}-${d}`;
             
             noteDates.add(dateStr);
-            allDateIds.push(dateId); // ランダム候補に追加
+            allDateIds.push(dateId);
             
             const ym = `${y}.${mo}`;
             if (ym !== currentYM) {
