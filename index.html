@@ -18,23 +18,27 @@
     html { scroll-padding-top: 80px; scroll-behavior: smooth; }
     body { background-color: var(--bg-color); font-family: -apple-system, sans-serif; margin: 0; padding-top: 65px; }
 
-    /* --- ヘッダー・ナビゲーション --- */
+    /* --- ヘッダー --- */
     #header-bar {
       position: fixed; top: 0; left: 0; width: 100%; height: 65px;
-      display: flex; align-items: center; justify-content: space-between; /* 両端に配置 */
-      padding: 0 20px;
+      display: flex; align-items: center; justify-content: center;
       background: rgba(255, 255, 255, 0.9); z-index: 2100;
       border-bottom: 1px solid #eee;
     }
     
-    #sidebar-toggle { cursor: pointer; flex-grow: 1; text-align: center; }
-    #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; margin-left: 60px; /* RANDOMボタンとのバランス */ }
+    #sidebar-toggle { cursor: pointer; }
+    #sidebar-toggle h4 { margin: 0; font-size: 0.85rem; letter-spacing: 0.5em; color: var(--primary); font-weight: 300; }
 
+    /* RANDOMボタンを右側に「縦」に配置 */
     #random-btn {
-      background: none; border: 1px solid var(--accent); color: var(--primary);
-      border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; cursor: pointer;
-      transition: 0.3s; white-space: nowrap;
+      position: fixed; top: 10px; right: 15px; z-index: 2200;
+      background: #fff; border: 1px solid var(--accent); color: var(--primary);
+      width: 32px; padding: 8px 0; border-radius: 16px;
+      font-size: 0.6rem; cursor: pointer; transition: 0.3s;
+      display: flex; flex-direction: column; align-items: center; line-height: 1.2;
+      letter-spacing: 0.1em; font-weight: bold;
     }
+    #random-btn span { display: block; } /* 1文字ずつ縦に並べる用 */
     #random-btn:hover { background: var(--primary); color: #fff; }
 
     /* --- カレンダーサイドバー --- */
@@ -51,11 +55,13 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 95%; max-width: 400px;
     }
     
-    /* 年月選択ドロップダウンのスタイル */
-    .cal-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 25px; }
-    .cal-header select { 
-      width: auto; margin-bottom: 0; padding: 5px 30px 5px 10px; 
-      font-size: 0.9rem; border-color: #eee; background-color: #fcfdfe;
+    /* ヘッダー：ボタンとドロップダウンの共存 */
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .cal-header button { background: none; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; padding: 0 10px; width: auto; margin:0; }
+    .cal-selectors { display: flex; gap: 5px; }
+    .cal-selectors select { 
+      width: auto; margin-bottom: 0; padding: 2px 25px 2px 8px; 
+      font-size: 0.85rem; border-color: #eee; height: 35px;
     }
 
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
@@ -78,20 +84,27 @@
 <body>
 
   <div id="header-bar">
-    <div style="width: 80px;"></div> <div id="sidebar-toggle"><h4>Cahier</h4></div>
-    <button id="random-btn">RANDOM</button>
+    <div id="sidebar-toggle"><h4>Cahier</h4></div>
   </div>
+  
+  <button id="random-btn">
+    <span>R</span><span>A</span><span>N</span><span>D</span><span>O</span><span>M</span>
+  </button>
 
   <nav id="sidebar">
     <div class="calendar-picker">
       <div class="cal-header">
-        <select id="year-select"></select>
-        <select id="month-select">
-          <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
-          <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
-          <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
-          <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
-        </select>
+        <button id="prev-month">＜</button>
+        <div class="cal-selectors">
+          <select id="year-select"></select>
+          <select id="month-select">
+            <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
+            <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
+            <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
+            <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
+          </select>
+        </div>
+        <button id="next-month">＞</button>
       </div>
       <div class="cal-grid" id="calendar-days">
         <div class="dow">S</div><div class="dow">M</div><div class="dow">T</div><div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
@@ -117,24 +130,47 @@
     const yearSelect = document.getElementById('year-select');
     const monthSelect = document.getElementById('month-select');
 
-    // 年の選択肢を生成 (2016-2026)
+    // 年選択肢生成
     for (let y = 2016; y <= 2026; y++) {
       let opt = document.createElement('option');
-      opt.value = y; opt.innerText = y + "年";
+      opt.value = y; opt.innerText = y;
       yearSelect.appendChild(opt);
     }
 
     function toggleMenu() {
       const isOpen = sidebar.classList.toggle('open');
       document.body.style.overflow = isOpen ? 'hidden' : '';
-      if(isOpen) {
-        yearSelect.value = displayDate.getFullYear();
-        monthSelect.value = displayDate.getMonth();
-        renderCalendar();
-      }
+      if(isOpen) syncSelects();
     }
     toggleBtn.onclick = toggleMenu;
 
+    function syncSelects() {
+      yearSelect.value = displayDate.getFullYear();
+      monthSelect.value = displayDate.getMonth();
+      renderCalendar();
+    }
+
+    // ボタンによる月移動
+    document.getElementById('prev-month').onclick = () => {
+      displayDate.setMonth(displayDate.getMonth() - 1);
+      syncSelects();
+    };
+    document.getElementById('next-month').onclick = () => {
+      displayDate.setMonth(displayDate.getMonth() + 1);
+      syncSelects();
+    };
+
+    // セレクトボックスによる変更
+    yearSelect.onchange = () => {
+      displayDate.setFullYear(yearSelect.value);
+      renderCalendar();
+    };
+    monthSelect.onchange = () => {
+      displayDate.setMonth(monthSelect.value);
+      renderCalendar();
+    };
+
+    // RANDOMボタンの機能
     document.getElementById('random-btn').onclick = () => {
       if (allDateIds.length === 0) return;
       const randomId = allDateIds[Math.floor(Math.random() * allDateIds.length)];
@@ -151,9 +187,8 @@
       const grid = document.getElementById('calendar-days');
       grid.querySelectorAll('.cal-day').forEach(d => d.remove());
 
-      const year = parseInt(yearSelect.value);
-      const month = parseInt(monthSelect.value);
-      displayDate = new Date(year, month, 1);
+      const year = displayDate.getFullYear();
+      const month = displayDate.getMonth();
 
       const firstDay = new Date(year, month, 1).getDay();
       const lastDate = new Date(year, month + 1, 0).getDate();
@@ -180,9 +215,6 @@
         grid.appendChild(dayEl);
       }
     }
-
-    yearSelect.onchange = renderCalendar;
-    monthSelect.onchange = renderCalendar;
 
     async function init() {
       try {
