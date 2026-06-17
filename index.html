@@ -150,6 +150,7 @@
     let allDateIds = [];
     let noteDates = new Set();
     let displayDate = new Date();
+    let debounceTimer;
 
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
