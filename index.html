@@ -233,6 +233,13 @@
       document.getElementById('record-count').innerText = `${visible.toLocaleString()} / ${allDateIds.length.toLocaleString()} records found`;
     }
 
+    function debounceFilter() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        filterNotes();
+      }, 300); // 300ms = 0.3秒
+    }
+
     function renderCalendar() {
       const grid = document.getElementById('calendar-days');
       grid.querySelectorAll('.cal-day').forEach(d => d.remove());
@@ -301,7 +308,7 @@
           }
         });
         document.getElementById('record-count').innerText = `${allDateIds.length.toLocaleString()} records`;
-        document.getElementById('search-input').oninput = filterNotes;
+        document.getElementById('search-input').oninput = debounceFilter;
       } catch (e) { console.error(e); }
     }
     window.onload = init;
